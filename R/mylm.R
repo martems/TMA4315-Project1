@@ -11,6 +11,7 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   # Add code here to calculate coefficients, residuals, fitted values, etc...
   # and store the results in the list est
   beta_hat = solve(t(X)%*%X)%*%t(X)%*%y
+  a = 1
   covmartix = cov(beta_hat)
   H = X%*%solve(t(X)%*%X)%*%t(X)
   Y_hat = H%*%y
