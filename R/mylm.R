@@ -11,19 +11,15 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   # Add code here to calculate coefficients, residuals, fitted values, etc...
   # and store the results in the list est
   beta_hat = solve(t(X)%*%X)%*%t(X)%*%y
-  a = 1
-  covmartix = cov(beta_hat)
-  H = X%*%solve(t(X)%*%X)%*%t(X)
-  Y_hat = H%*%y
+  Y_hat = X%*%beta_hat
   residuals = y-Y_hat
   n = nrow(mf)
   p = ncol(mf)
-  sigmasqd = (1/(n-p))*t(y-X%*%beta_hat)%*%(y-X%*%beta_hat)
-  var_beta_hat = sigmasqd%*%solve(t(X)%*%X)
-  std_beta_hat = sqrt(var_beta_hat)
+  sigmasqd = (1/(n-p))*t(y-X%*%beta_hat)*(y-X%*%beta_hat)
+  covmatrix = sigmasqd*solve(t(X)%*%X)
+  std_beta_hat = sqrt(diag(covmatrix))
 
-
-  est <- list(terms = beta_hat, model = mf)
+  est <- list(terms = terms, model = mf)
 
   # Store call and formula used
   est$call <- match.call()
@@ -31,6 +27,9 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
 
   # Set class name. This is very important!
   class(est) <- 'mylm'
+
+  est$coefficients = beta_hat
+  est$residuals = residuals
 
   # Return the object with all results
   return(est)
