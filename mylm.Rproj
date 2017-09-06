@@ -17,4 +17,5 @@ StripTrailingWhitespace: Yes
 
 BuildType: Package
 PackageUseDevtools: Yes
+PackagePath: mylm
 PackageInstallArgs: --no-multiarch --with-keep.source

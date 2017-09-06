@@ -18,6 +18,8 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   sigmasqd = (1/(n-p))*t(y-X%*%coefficients)*(y-X%*%coefficients)
   covmatrix = sigmasqd*solve(t(X)%*%X)
   std_coefficients = sqrt(diag(covmatrix))
+  z = coefficients/std_coefficients
+  pvalue = 2*pnorm(z,lower.tail = FALSE)
 
   est <- list(terms = terms, model = mf)
 
