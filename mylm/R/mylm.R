@@ -13,11 +13,21 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   coefficients = solve(t(X)%*%X)%*%t(X)%*%y
   Y_hat = X%*%coefficients
   residuals = y-Y_hat
+
   n = nrow(mf)
   p = ncol(mf)
-  sigmasqd = (1/(n-p))*t(y-X%*%coefficients)*(y-X%*%coefficients)
+
+  SSE = t(y-X%*%coefficients)*(y-X%*%coefficients)
+  I = matrix(0,nrow=n,ncol=n)
+  I[row(I)==col(I)] = 1
+  J = matrix(1,nrow=n,ncol=n)
+  SST = t(y)%*%(I-J/n)%*%Y
+  R_squared = 1-SSE/SST
+
+  sigmasqd = SSEn/(n-p)
   covmatrix = sigmasqd*solve(t(X)%*%X)
   std_coefficients = sqrt(diag(covmatrix))
+
   z = coefficients/std_coefficients
   pvalue = 2*pnorm(z,lower.tail = FALSE)
 
@@ -29,7 +39,7 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
 
   # Set class name. This is very important!
   class(est) <- 'mylm'
-
+  #vet ikke helt hvordan man gjør det her
   est$coefficients = coefficients
   est$residuals = residuals
 
