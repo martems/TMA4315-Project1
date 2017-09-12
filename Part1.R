@@ -1,6 +1,5 @@
-install.packages("car")
-install.packages("GGally")
 library(car)
+library(GGally)
 data(SLID,package = "car")
 SLID = SLID[complete.cases(SLID), ]
 ds = SLID

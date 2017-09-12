@@ -17,6 +17,7 @@ output: #3rd letter intentation hierarchy
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2, quietly = TRUE, warn.conflicts = FALSE)
 library(car, quietly = TRUE, warn.conflicts = FALSE)
 library(GGally, quietly = TRUE, warn.conflicts = FALSE)
 ```
@@ -35,9 +36,17 @@ summary(ds)
 levels(ds$sex)
 levels(ds$language)
 
-ggpairs(ds)
+g <- ggpairs(ds)
+g
 
-lm <- lm(formula = wages ~ education+age+sex+language,data=SLID)
+lm <- lm(formula = wages~education+age+sex+language, data=SLID)
 summary(lm)
 ```
-
+ There is a positive correlation between education/age and wages, as expected. The general level of education is lower for older age segments, indicating that higher education has become more prevalent amongst yonger people. Women's average pay is lower than men's.
+ 
+ ## Assumptions of multiple linear regression (MLR) analysis
+ If we want to perform MLR analysis, the following must hold true:
+   1) Wages ($Y$) must be a linear response to the covariates ($X$), education, age, sex and language. $\mathb{Y} = \mathb{X}\beta + \epsilon$.
+   2) The error needs to have equal and uncorrelated variance for each covariate. $Cov{\epsilon} = \sigma^2 \mathb{I}$.
+   3) Errors need to be additive (see formula related to pt. 1).
+   4) Errors need to be normally distributed. $\epsilon ~ N_n(\mathb{0}, \sigma^2 \mathb{I})$.
