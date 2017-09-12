@@ -17,24 +17,27 @@ output: #3rd letter intentation hierarchy
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(car, quietly = TRUE, warn.conflicts = FALSE)
+library(GGally, quietly = TRUE, warn.conflicts = FALSE)
 ```
 
 ## Part 1: Explanatory analysis of the dataset 
 
-```{r}
-install.packages("car")
-install.packages("GGally")
-library(car)
-data(SLID,package = "car")
-SLID = SLID[complete.cases(SLID), ]
-ds = SLID
+```{r, quietly=TRUE}
+data(SLID, package = "car")
+SLID <- SLID[complete.cases(SLID), ]
+ds <- SLID
+
 colnames(ds)
 dim(ds)
 summary(ds)
+
 levels(ds$sex)
 levels(ds$language)
+
 ggpairs(ds)
-lm = lm(formula = wages ~ education+age+sex+language,data=SLID)
+
+lm <- lm(formula = wages ~ education+age+sex+language,data=SLID)
 summary(lm)
 ```
 
