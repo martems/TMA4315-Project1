@@ -37,10 +37,10 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   est$formula <- formula
   est$coefficients = coefficients
   est$residuals = residuals
-  est$sums-of-sq.-errors = SSE
-  est$sums-of-sq.-total = SST
-  est$R-squared = R_squared
-  est$
+  est$sumssqerrors = SSE
+  est$sumssqtotal = SST
+  est$Rsquared = R_squared
+
 
 
   # Set class name. This is very important!
