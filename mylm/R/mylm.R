@@ -50,11 +50,11 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   covmatrix <- sigmasq*solve(t(X)%*%X)
   std_coefficients <- sqrt(diag(covmatrix))
   z <- beta/std_coefficients
-  pvalue_z <- 2*pnorm(z,lower.tail = FALSE)
+  pvalue_z <- 1-2*pnorm(abs(z))
 
   #chisq test significance of the regression
   chisq <- (SST-SSE)/(SSE/(n-p))
-  pvalue_chisq <- pchisq(chisq, df=k, lower.tail=FALSE)
+  pvalue_chisq <- 1-pchisq(chisq, df=k)
 
   #ciritcal values of the tests
   alpha <- 0.05
@@ -113,25 +113,42 @@ print.mylm <- function(object, ...){
 summary.mylm <- function(object, ...){
   # Code here is used when summary(object) is used on objects of class "mylm"
   # Useful functions include cat, print.default and format
-  cat('Summary of object\n')
   cat('Call\n')
   print(object$call)
   cat('\nResiduals:\n')
-  print.default(object$residual_quantiles,digits=3,quote=FALSE)
-  #quantiles<-t(data.matrix(object$residual_quantiles))
-  #rownames etc
+  #print.default(object$residual_quantiles,digits=3,quote=FALSE)
+  quantiles<-t(signif(object$residual_quantiles,digits=3))
+  colnames(quantiles)=c("Min","1Q","Median","3Q","Max")
+  rownames(quantiles)=NULL
+  print(quantiles)
   cat('\nCoefficients:\n')
-  coeffmatrix <- matrix(c(object$coefficients,data.matrix(object$std_error_coeff),object$z_stat,object$pvalue_z),nrow<-object$p)
-  rownames(coeffmatrix)<-rownames(object$coefficients)
-  colnames(coeffmatrix)<-c("Estimate","Std. Error","z value","Pr(>|z|)")
+  signif <- vector(mode="character",length=nrow(object$coefficients))
+  #print(signif)
+  for (i in 1:nrow(object$coefficients)){
+    if (object$pvalue_z[i] < 0.001){
+      signif[i] = "***"
+    } else if (object$pvalue_z[i] < 0.01){
+      signif[i] = "**"
+    } else if (object$pvalue_z[i] < 0.05){
+      signif[i] = "*"
+    } else if (object$pvalue_z[i] < 0.1){
+      signif[i] = "."
+    } else if (object$pvalue_z[i] <= 1)
+      signif[i] = " "
+  }
+  coeffmatrix <- matrix(c(object$coefficients,data.matrix(object$std_error_coeff),object$z_stat,object$pvalue_z),nrow<-nrow(object$coefficients))
+  coeffmatrix <- round(coeffmatrix,4)
   coeffmatrix <- data.frame(coeffmatrix)
+  coeffmatrix <- cbind(coeffmatrix,signif)
+  rownames(coeffmatrix)<-rownames(object$coefficients)
+  colnames(coeffmatrix)<-c("Estimate","Std. Error","z value","Pr(>|z|)","   ")
   options(digits=5)
-  print(coeffmatrix)
-  #trenger signi.codes
+  print(coeffmatrix,digits=5)
+
   cat('\nSignif. codes: 0 ´***´ 0.001 ´**´ 0.01 ´*´ 0.05 ´.´ 0.1 ´ ´ 1\n')
   cat('\nResidual standard error: ', object$residual_std_err, 'on',object$df,'degrees of freedom\n')
   cat('Multiple R-squared: ', object$R_squared, '    Adjusted R-squared: ',object$R_adjusted,'\n')
-  cat('Chisquared-statistis: ', object$chisq_stat, 'on', object$k, 'and', object$df, 'DF, ', '  p-value: ', object$pvalue_chisq)
+  cat('Chisquared-statistics: ', object$chisq_stat, 'on', object$k, 'and', object$df, 'DF, ', '  p-value: ', formatC(object$pvalue_chisq,digits=1,format="e"))
 
 }
 
@@ -157,6 +174,12 @@ anova.mylm <- function(object, ...){
 
   # Fit the sequence of models
   txtFormula <- paste(response, "~", sep = "")
+
+  no = txtFormula
+  no = paste(no,1)
+  formulano = formula(no)
+  model_nocoeff <- lm(formula = formulano,data=object$model)
+
   model <- list()
   for(numComp in 1:length(comp)){
     if(numComp == 1){
@@ -169,15 +192,59 @@ anova.mylm <- function(object, ...){
     model[[numComp]] <- lm(formula = formula, data = object$model)
   }
 
+
+  SSE <- vector()
+  SSEdiff <- vector()
+  SSE_nocoeff <- t(model_nocoeff$residuals)%*%model_nocoeff$residuals
+  SSE[1] = SSE_nocoeff
+  Res.Df <- vector()
+  Res.Df[1] <- model_nocoeff$df.residual
+  Df <-vector()
+  MeanSSE <- vector()
+  X2_value <- vector()
+  pvalue_chisqX2 <- vector()
   # Print Analysis of Variance Table
   cat('Analysis of Variance Table\n')
   cat(c('Response: ', response, '\n'), sep = '')
-  cat('          Df  Sum sq X2 value Pr(>X2)\n')
-  for(numComp in 1:length(comp)){
-    # Add code to print the line for each model tested
-  }
+  #cat('          Df  Sum sq X2 value Pr(>X2)\n')
 
-  return(model)
+  for(numComp in 1:length(comp)){
+    SSE[numComp+1] <- t(model[[numComp]]$residuals)%*%model[[numComp]]$residuals
+    SSEdiff[numComp] <- SSE[numComp]-SSE[numComp+1]
+    Res.Df[numComp+1] <- model[[numComp]]$df.residual
+    Df[numComp] <- Res.Df[numComp] - Res.Df[numComp+1]
+    MeanSSE[numComp] <- SSEdiff[numComp]/Df[numComp]
+  }
+  for(numComp2 in 1:length(comp)){
+    X2_value[numComp2] <- SSEdiff[numComp2]/(SSE[length(comp)]/Res.Df[length(comp)])
+    pvalue_chisqX2[numComp2] <- 1-pchisq(X2_value[numComp2], df=Df[numComp2])
+  }
+  signif2 <- vector(mode="character",length=length(comp))
+  for (i in 1:length(pvalue_chisqX2)){
+    if (pvalue_chisqX2[i] < 0.001){
+      signif2[i] = "***"
+    } else if (pvalue_chisqX2[i] < 0.01){
+      signif2[i] = "**"
+    } else if (pvalue_chisqX2[i] < 0.05){
+      signif2[i] = "*"
+    } else if (pvalue_chisqX2[i] < 0.1){
+      signif2[i] = "."
+    } else if (pvalue_chisqX2[i] <= 1)
+      signif2[i] = " "
+  }
+  anovamatrix <- cbind(Df,SSEdiff,X2_value,pvalue_chisqX2)
+  anovamatrix <- round(anovamatrix,2)
+  anovamatrix <- data.frame(anovamatrix)
+  anovamatrix <- cbind(anovamatrix,signif2)
+  rownames(anovamatrix)=comp
+  colnames(anovamatrix)=c("Df","Sum sq","X2 value","Pr(>X2)","   ")
+  print(anovamatrix)
+  cat("Residuals ", tail(Res.Df,n=1), tail(SSE,n=1), round(tail(SSE,n=1)/tail(Res.Df,n=1)))
+
+
+
+
+  #return(model)
 
 }
 
