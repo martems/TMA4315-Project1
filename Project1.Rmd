@@ -86,6 +86,7 @@ library(mylm)
 model1 <- mylm(wages ~ education, data = SLID)
 print(model1)
 ```
+WHAT IS THE INTERPRETATION OF THE PARAMTERER ESTIMATES? 
 
 ## plot.mylm 
 
@@ -107,19 +108,26 @@ $\text{SST} = {\bf Y}^T({\bf I}-\frac{1}{n}{\bf 1 1}^T){\bf Y}$ is the sums of s
 ```{r}
 model1$SST
 ```
-The degrees of freedom is $n-p$. The degrees of freedom for this model with $p=2$ is:
+The degrees of freedom for a linear model is $n-p$. The degrees of freedom for this model with $p=2$ is:
 ```{r}
 model1$df
 ```
 
 Estimate for $\sigma^2$ is found by the restricted maximum likelihood estimator
 $\hat{\sigma}^2=frac{\text{SSE}}{n-p}$, and $\hat{\sigma}$ is the residual standard error. 
-From this, the estimated covariance matrix of the parameter estimates can be calulated by $\hat{\sigma}^2({\bf X}^T{\bf X})^{-1}$. 
-
-We perform a $z$-test to test the significance of the estimated coefficients. The $z$-values for each coefficient $\hat{\beta_j}$ is caluclated by $\frac{\hat{\beta_j}}{\sqrt(c_{jj})\hat{\sigma}}$, where $c_{jj}$ is diagonal element $j$ of $({\bf X}^T{\bf X})^{-1})$. The associated p-values is found by the commands
-```{r eval = FALSE}
-pvalue_ztest <- 2*pnorm(abs(z),lower.tail = FALSE)
+From this, the estimated covariance matrix of the parameter estimates can be calulated by $\hat{\sigma}^2({\bf X}^T{\bf X})^{-1}$. The estimate is 
+```{r}
+model1$comatrix
 ```
+
+The standard errors of the intercept and regression coefficient are found by taking the square root of the covariance matrix, or ${\sqrt(c_{jj})\hat{\sigma}}$, where $c_{jj}$ is diagonal element $j$ of $({\bf X}^T{\bf X})^{-1})$. 
+```{r}
+model1$std_error_coeff
+```
+
+We perform a $z$-test to test the significance of the estimated coefficients. The $z$-values for each coefficient $\hat{\beta_j}$ is caluclated by $\frac{\hat{\beta_j}}{\sqrt(c_{jj})\hat{\sigma}}$. 
+
+
 
 ## c)
 
