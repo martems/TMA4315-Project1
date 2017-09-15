@@ -44,12 +44,13 @@ summary(lm)
 ```
  There is a positive correlation between education/age and wages, as expected. The general level of education is lower for older age segments, indicating that higher education has become more prevalent amongst yonger people. Women's average pay is lower than men's.
  
- ## Assumptions of multiple linear regression (MLR) analysis
- If we want to perform MLR analysis, the following must hold true:
-   1) Wages ($Y$) must be a linear response to the covariates ($X$), education, age, sex and language. $\mathb{Y} = \mathb{X}\beta + \epsilon$.
-   2) The error needs to have equal and uncorrelated variance for each covariate. $Cov{\epsilon} = \sigma^2 \mathb{I}$.
-   3) Errors need to be additive (see formula related to pt. 1).
-   4) Errors need to be normally distributed. $\epsilon ~ N_n(\mathb{0}, \sigma^2 \mathb{I})$.
+## Assumptions of multiple linear regression (MLR) analysis
+If we want to perform MLR analysis, the following must hold true:
+ 
+1. Wages ($\bf Y$) must be a linear response to the covariates ($\bf X$), education, age, sex and language. $\bf Y = \bf X\beta + \epsilon$.
+2. The error needs to have equal and uncorrelated variance for each covariate. $\mathrm{Cov}({\epsilon}) = \sigma^2 \bf{I}$.
+3. Errors need to be additive (see formula related to pt. 1).
+4. Errors need to be normally distributed. $\epsilon  N_n(\bf{0}, \sigma^2 \bf{I})$.
 
 # Part 2: Linear regression with mylm package
 In this project we have created our own R-package, `mylm`, to handle linear models for Gaussian data and we use this package to analyse a dataset. 
