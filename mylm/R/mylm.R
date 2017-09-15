@@ -24,11 +24,11 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   # and store the results in the list est
 
   #Coefficients, residuals
-  beta <- solve(t(X)%*%X)%*%t(X)%*%y
-  Y_hat <- X%*%beta
+  coefficients <- solve(t(X)%*%X)%*%t(X)%*%y
+  Y_hat <- X%*%coefficients
   residuals <- y-Y_hat
-  n <- nrow(mf)
-  p <- ncol(mf)
+  n <- nrow(Y_hat)
+  p <- nrow(coefficients)
   k <- p-1
   df <- n-p
   residual_quantiles <- quantile(residuals)
@@ -42,19 +42,19 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   R_squared <- 1-SSE/SST
   R_adjusted <- 1 - (n-1)*(1-R_squared)/(n-p)
   residual_standard_error <- sqrt(SSE/(n-p))
-  linear_corr_coeff <- cor(X,method="pearson")
+  linear_corr_coeff <- cor(X[,2:p],method="pearson")
 
   #z-test test of significance
   sigmasq <- SSE/(n-p)
   sigmasq <- sigmasq[1,1]
   covmatrix <- sigmasq*solve(t(X)%*%X)
   std_coefficients <- sqrt(diag(covmatrix))
-  z <- beta/std_coefficients
-  pvalue_z <- 1-2*pnorm(abs(z))
+  z <- coefficients/std_coefficients
+  pvalue_z <- 2*pnorm(abs(z),lower.tail = FALSE)
 
   #chisq test significance of the regression
   chisq <- (SST-SSE)/(SSE/(n-p))
-  pvalue_chisq <- 1-pchisq(chisq, df=k)
+  pvalue_chisq <- pchisq(chisq, df=k, lower.tail = FALSE)
 
   #ciritcal values of the tests
   alpha <- 0.05
@@ -67,14 +67,17 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   est$call <- match.call()
   est$formula <- formula
   est$X <- X
-  est$coefficients <- beta
+  est$y <- y
+  est$Y_hat <- Y_hat
+  est$coefficients <- coefficients
   est$residuals <- residuals
-  est$sums_sq_errors <- SSE
-  est$sums_sq_total <- SST
+  est$SSE <- SSE
+  est$SST <- SST
   est$R_squared <- R_squared
   est$R_adjusted <- R_adjusted
   est$n <- n
   est$p <- p
+  est$k <- k
   est$df <- df
   est$sigma_sq <- sigmasq
   est$covmatrix <- covmatrix
@@ -117,9 +120,8 @@ summary.mylm <- function(object, ...){
   print(object$call)
   cat('\nResiduals:\n')
   #print.default(object$residual_quantiles,digits=3,quote=FALSE)
-  quantiles<-t(signif(object$residual_quantiles,digits=3))
+  quantiles<-t(round(object$residual_quantiles,2))
   colnames(quantiles)=c("Min","1Q","Median","3Q","Max")
-  rownames(quantiles)=NULL
   print(quantiles)
   cat('\nCoefficients:\n')
   signif <- vector(mode="character",length=nrow(object$coefficients))
@@ -136,31 +138,33 @@ summary.mylm <- function(object, ...){
     } else if (object$pvalue_z[i] <= 1)
       signif[i] = " "
   }
-  coeffmatrix <- matrix(c(object$coefficients,data.matrix(object$std_error_coeff),object$z_stat,object$pvalue_z),nrow<-nrow(object$coefficients))
-  coeffmatrix <- round(coeffmatrix,4)
+  coeffmatrix <- matrix(c(round(object$coefficients,4),round(data.matrix(object$std_error_coeff),4),round(object$z_stat,2),object$pvalue_z),nrow<-nrow(object$coefficients))
   coeffmatrix <- data.frame(coeffmatrix)
   coeffmatrix <- cbind(coeffmatrix,signif)
   rownames(coeffmatrix)<-rownames(object$coefficients)
   colnames(coeffmatrix)<-c("Estimate","Std. Error","z value","Pr(>|z|)","   ")
-  options(digits=5)
-  print(coeffmatrix,digits=5)
+  print(coeffmatrix)
 
   cat('\nSignif. codes: 0 ´***´ 0.001 ´**´ 0.01 ´*´ 0.05 ´.´ 0.1 ´ ´ 1\n')
   cat('\nResidual standard error: ', object$residual_std_err, 'on',object$df,'degrees of freedom\n')
-  cat('Multiple R-squared: ', object$R_squared, '    Adjusted R-squared: ',object$R_adjusted,'\n')
-  cat('Chisquared-statistics: ', object$chisq_stat, 'on', object$k, 'and', object$df, 'DF, ', '  p-value: ', formatC(object$pvalue_chisq,digits=1,format="e"))
+  cat('Multiple R-squared: ', object$R_squared, '\n') #    Adjusted R-squared: ',object$R_adjusted,'\n')
+  cat('Chisquared-statistics: ', object$chisq_stat, 'on', object$k, 'and', object$df, 'DF, ', '  p-value: ', object$pvalue_chisq)
 
 }
 
 plot.mylm <- function(object, ...){
   # Code here is used when plot(object) is used on objects of class "mylm"
-
+  plotfit <- data.frame(fitvals = object$Y_hat, residuals = object$residuals,
+                       obsvals = object$y)
   library(ggplot2)
-  # ggplot requires that the data is in a data.frame, this must be done here
-  ggplot() + geom_point()
 
+  fittedvals_plot <- ggplot(plotfit,aes(fitvals, residuals)) + geom_point(pch = 21) + geom_hline(yintercept = 0, linetype ="dashed") + labs(x = "Fitted values", y = "Residuals", title = "Residuals vs Fitted values",subtitle = deparse(object$call))
+  #+ geom_hline(yintercept = 0,linetype = "dashed") + geom_smooth(se = FALSE, col = "red", size = 0.5, method = "loess")
+  obsvals_plot <- ggplot(plotfit,aes(obsvals, residuals)) + geom_point(pch = 21) + geom_hline(yintercept = 0, linetype ="dashed") + labs(x = "Observed values", y = "Residuals", title = "Residuals vs Observed values",subtitle = deparse(object$call))
   # if you want the plot to look nice, you can e.g. use "labs" to add labels, and add colors in the geom_point-function
+  list_plot <- list(fittedvals_plot,obsvals_plot)
 
+  return(list_plot)
 }
 
 anova.mylm <- function(object, ...){
@@ -206,7 +210,7 @@ anova.mylm <- function(object, ...){
   # Print Analysis of Variance Table
   cat('Analysis of Variance Table\n')
   cat(c('Response: ', response, '\n'), sep = '')
-  #cat('          Df  Sum sq X2 value Pr(>X2)\n')
+  #cat('          Df  sq X2 value Pr(>X2)\n')
 
   for(numComp in 1:length(comp)){
     SSE[numComp+1] <- t(model[[numComp]]$residuals)%*%model[[numComp]]$residuals
@@ -217,7 +221,7 @@ anova.mylm <- function(object, ...){
   }
   for(numComp2 in 1:length(comp)){
     X2_value[numComp2] <- SSEdiff[numComp2]/(SSE[length(comp)]/Res.Df[length(comp)])
-    pvalue_chisqX2[numComp2] <- 1-pchisq(X2_value[numComp2], df=Df[numComp2])
+    pvalue_chisqX2[numComp2] <- pchisq(X2_value[numComp2], df=Df[numComp2], lower.tail = FALSE)
   }
   signif2 <- vector(mode="character",length=length(comp))
   for (i in 1:length(pvalue_chisqX2)){
