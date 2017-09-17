@@ -110,7 +110,6 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
 print.mylm <- function(object, ...){
   # Code here is used when print(object) is used on objects of class "mylm"
   # Useful functions include cat, print.default and format
-  cat('Info about object\n')
   cat('Call:\n')
   print(object$call)
   cat('\n')

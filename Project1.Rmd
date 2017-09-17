@@ -27,16 +27,13 @@ library(GGally, quietly = TRUE, warn.conflicts = FALSE)
 ```{r, quietly=TRUE}
 data(SLID, package = "car")
 SLID <- SLID[complete.cases(SLID), ]
-ds <- SLID
 
-colnames(ds)
-dim(ds)
-summary(ds)
+summary(SLID)
 
-levels(ds$sex)
-levels(ds$language)
+levels(SLID$sex)
+levels(SLID$language)
 
-g <- ggpairs(ds)
+g <- ggpairs(SLID)
 g
 
 lm <- lm(formula = wages~education+age+sex+language, data=SLID)
@@ -45,12 +42,12 @@ summary(lm)
 There is a positive correlation between education/age and wages, as expected. The general level of education is lower for older age segments, indicating that higher education has become more prevalent amongst yonger people. Women's average pay is lower than men's.
  
 ## Assumptions of multiple linear regression (MLR) analysis
- If we want to perform MLR analysis, the following must hold true:
+If we want to perform MLR analysis, the following must hold true:
  
    1. Wages ($Y$) must be a linear response to the covariates ($X$), education, age, sex and language. $Y = X\beta + \epsilon$.
-   2. The error needs to have equal and uncorrelated variance for each covariate. $\text{Cov}\varepsilon = \sigma^2 I$.
+   2. The error needs to have equal and uncorrelated variance for each covariate. $\text{Var}(\varepsilon) = \sigma^2 I$.
    3. Errors need to be additive (see formula related to pt. 1).
-   4. Errors need to be normally distributed. $\varepsilon ~ N_n(0, \sigma^2 I)$.
+   4. Errors need to be normally distributed. $\varepsilon \sim N_n(0, \sigma^2 I)$.
 
 # Part 2: Linear regression with mylm package
 In this project we have created our own R-package, `mylm`, to handle linear models for Gaussian data and we use this package to analyse a dataset. 
@@ -84,7 +81,7 @@ This function prints out the call and the estimates of the coefficients.
 
 ### Estimates of the regression coefficients
 Estimates of the regression coefficients $\hat\beta$ are calculated with the LS and ML estimator 
-$$\hat\beta=({\bf X}^T{\bf X})^{-1} {\bf X}^T {\bf Y}$$.
+$$\hat\beta=({\bf X}^T{\bf X})^{-1} {\bf X}^T {\bf Y}$$
 
 ```{r}
 library(mylm)
@@ -102,7 +99,7 @@ The function makes a scatter plot with fitted value on the $x$-axis and residual
 
 The fitted values and residuals calculated with the formulas 
 $$\hat{\bf Y}={\bf X}\hat{\beta}$$ 
-$$\hat{\varepsilon}={\bf Y}-\hat{\bf Y}$$. 
+$$\hat{\varepsilon}={\bf Y}-\hat{\bf Y}$$
 
 ```{r}
 plot(model1)
@@ -125,7 +122,7 @@ model1$SST
 The degrees of freedom for a linear model is $n-p$. This give following value for the linear model: `r model1$df`
 
 
-### $\hat{\sigma}^2, covariance matrix and standard erros$
+### $\hat{\sigma}^2$, covariance matrix and standard erros
 
 Estimate for $\sigma^2$ is found by the restricted maximum likelihood estimator
 $$\hat{\sigma}^2=\frac{\text{SSE}}{n-p}$$
@@ -143,10 +140,17 @@ model1$std_error_coeff
 ### Significance of estimated coefficients and significance of the regression 
 
 We perform a $z$-test to test the significance of the estimated coefficients. The $z$-values for each coefficient $\hat{\beta_j}$ is caluclated by 
-$$z_{value}=\frac{\hat{\beta_j}}{\sqrt{c_{jj}}\hat{\sigma}}$$. 
+$$z_{value}=\frac{\hat{\beta_j}}{\sqrt{c_{jj}}\hat{\sigma}}$$
 
 We test the significance of the regression using a $\chi^2$-test with $k=p-1$ degrees of freedom. We test if at least one of the regression pramteres is different from 0. The expression for the $\chi^2$-statistics is 
 $$\chi_k^2=\frac{\text{SST}-\text{SSE}}{\frac{\text{SSE}}{n-p}}$$
+The critical values for the tests are
+```{r}
+model1$critical_z
+model1$critical_chi
+```
+
+
 MÅ GJØRES -------
 WHAT IS THE RELATIONSHIP BEWTEEN THE TWO z test and chi sq test
 
@@ -155,7 +159,7 @@ WHAT IS THE RELATIONSHIP BEWTEEN THE TWO z test and chi sq test
 The coefficient of determination, $R^2$ is estimated with the formula $R^2 = 1-SSE/SST$. $R^2$ for this model is `r model1$R_squared`. $R^2$ can take a value between 0 and 1 and closer it is to 1, the better the fit to the data. 
 
 The Pearson's linear correlation coefficient is a measure of the linear correlation between two variables $x_i$ and $x_j$. It has a value between +1 and −1, where 1 is total positive linear correlation, 0 is no linear correlation, and −1 is total negative linear correlation. The expression is 
-$$r = \frac{\text{cov}(x_i,x_j)}{\sigma_{x_i}\sigma_{x_j}}$$. 
+$$r = \frac{\text{cov}(x_i,x_j)}{\sigma_{x_i}\sigma_{x_j}}$$ 
 The numerical values for `model1` is
 
 ```{r}
@@ -182,15 +186,20 @@ anova(model1)
 
 # Part 3: Multiple linear regression 
 
-We fit a linear regression model to the data with wages as the response with education and age as
-predictors.
+We fit a linear regression model to the data with `wages` as the response with `education` and `age` as predictors.
 
 ```{r}
 model2 <- mylm(wages ~ education+age, data = SLID)
 summary(model2)
 ```
 
-Fit two simple linear regression with only age and only education to compare
+MÅ GJØRES ---------
+What are the estimates and standard errors of the intercepts and regression coefficients for this model? Test
+the significance of the coefficients using a z-test. What is the interpretation of the parameters?
+
+
+
+We fit two simple linear regression with only age and only education to compare
 
 ```{r}
 model2onlyage <- mylm(wages ~ age, data = SLID)
@@ -216,6 +225,7 @@ summary(model3a)
 summary(model3b)
 ```
 
+MÅ GJØRES------
 What are the estimate and standard error of the intercept and effects of factors for this model? Test the
 significance of the factors using a z-test. What is the interpretation of the parameters?
 Do this for both dummy variable and effect coding, and comment briefly on the main differences (e.g., do the
@@ -225,8 +235,9 @@ parameter estimates or the fitted values change?). Notice how the model matrix c
 anova(model3a)
 anova(model3b)
 ```
+ANOVA GIR SAMME RESULTAT FOR DUMMY OG EFFECT TROR VI MÅ GJØRE NOE ENDRINGER I ANOVA VET IKKE HVORDAN
+MÅ GJØRES-----
 comment on the results
-
 Why are the commands
 anova(mylm(wages ~ sex + language, data = SLID))
 and
@@ -238,6 +249,8 @@ model4a <- mylm(wages ~ sex + age + sex*age, data = SLID)
 model4b <- mylm(wages ~ sex + age + sex*age, data = SLID, contrasts = list(language = "contr.sum",
 sex = "contr.sum"))
 ```
+
+MÅ GJØRES-------
 What is now the interpretation of the
 parameters, and especially the interaction term?
 Test whether regression coefficients have a common slope or not. Plot the regression lines for the different
@@ -256,18 +269,21 @@ model5c <- mylm(wages ~ education-1, data = SLID)
 ```{r}
 summary(model5a)
 ```
+MÅ GJØRES---
 Based on the results from each model, write a few sentences about the interpretation and significance of the
 parameters, and mention one small change that could make the model better.
 
 ```{r}
 summary(model5b)
 ```
+MÅ GJØRES----
 Based on the results from each model, write a few sentences about the interpretation and significance of the
 parameters, and mention one small change that could make the model better.
 
 ```{r}
 summary(model5c)
 ```
+MÅ GJØRES----
 Based on the results from each model, write a few sentences about the interpretation and significance of the
 parameters, and mention one small change that could make the model better.
 
