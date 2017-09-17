@@ -16,7 +16,7 @@ output: #3rd letter intentation hierarchy
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,tidy = TRUE, message = FALSE, warning = FALSE)
 library(ggplot2, quietly = TRUE, warn.conflicts = FALSE)
 library(car, quietly = TRUE, warn.conflicts = FALSE)
 library(GGally, quietly = TRUE, warn.conflicts = FALSE)
@@ -42,57 +42,67 @@ g
 lm <- lm(formula = wages~education+age+sex+language, data=SLID)
 summary(lm)
 ```
- There is a positive correlation between education/age and wages, as expected. The general level of education is lower for older age segments, indicating that higher education has become more prevalent amongst yonger people. Women's average pay is lower than men's.
+There is a positive correlation between education/age and wages, as expected. The general level of education is lower for older age segments, indicating that higher education has become more prevalent amongst yonger people. Women's average pay is lower than men's.
  
 ## Assumptions of multiple linear regression (MLR) analysis
-If we want to perform MLR analysis, the following must hold true:
+ If we want to perform MLR analysis, the following must hold true:
  
-1. Wages ($\bf Y$) must be a linear response to the covariates ($\bf X$), education, age, sex and language. $\bf Y = \bf X\beta + \epsilon$.
-2. The error needs to have equal and uncorrelated variance for each covariate. $\mathrm{Cov}({\epsilon}) = \sigma^2 \bf{I}$.
-3. Errors need to be additive (see formula related to pt. 1).
-4. Errors need to be normally distributed. $\epsilon  N_n(\bf{0}, \sigma^2 \bf{I})$.
+   1. Wages ($Y$) must be a linear response to the covariates ($X$), education, age, sex and language. $Y = X\beta + \epsilon$.
+   2. The error needs to have equal and uncorrelated variance for each covariate. $\text{Cov}\varepsilon = \sigma^2 I$.
+   3. Errors need to be additive (see formula related to pt. 1).
+   4. Errors need to be normally distributed. $\varepsilon ~ N_n(0, \sigma^2 I)$.
 
 # Part 2: Linear regression with mylm package
 In this project we have created our own R-package, `mylm`, to handle linear models for Gaussian data and we use this package to analyse a dataset. 
 The dataset consists of 3987 observations on the following 5 variables:
+
 * `print.mylm`, gives the call to the mylm-function and the estimates of the coefficients
 * `plot.mylm`, makes a scatter plot with fitted values and residuals
 * `summary.mylm`, returns a list of summary statistics of the fitted linear model like coefficients, standard errors, test of significance etc. 
 * `anova,mylm`, gives the results of a sequential ANOVA
 
 We want to study how the qualitative variable `wages` depens on one or more explanatory variables. The package constists of the following functions: 
+
 * `wages`, composite hourly wage rate from all jobs
 * `education`, number of years in schooling
 * `age`, in years
 * `sex`, Male or Female
 * `language`, English, French or Other
 
-Notation:
-${\bf Y}: (n \times 1)$ vector of responses
-${\bf X}: (n \times p)$ design matrix
-${\bf \beta}: (p \times 1)$ vector of regression paramteres inlcuding the intercept ($p=k+1$)
-${\bf \varepsilon}: (n \times 1)$ vector of random errors
+### Notation:
 
-In the following sections formulas used to make the functions in mylm-package will be presented. The functions are used on a linear regression model and the results are presented. 
+* ${\bf Y}: (n \times 1)$ vector of responses
+* ${\bf X}: (n \times p)$ design matrix
+* ${\bf \beta}: (p \times 1)$ vector of regression paramteres inlcuding the intercept ($p=k+1$)
+* ${\bf \varepsilon}: (n \times 1)$ vector of random errors
+
+In the following sections formulas used to make the functions in the `mylm` package will be presented. The functions are used on a linear regression model and the results are presented. 
 
 ## print.mylm 
 
 This function prints out the call and the estimates of the coefficients. 
 
-Estimates of the regression coefficients $\hat\beta$ are calculated with the LS and ML estimator $\hat\beta=({\bf X}^T{\bf X})^{-1} {\bf X}^T {\bf Y}$.
+### Estimates of the regression coefficients
+Estimates of the regression coefficients $\hat\beta$ are calculated with the LS and ML estimator 
+$$\hat\beta=({\bf X}^T{\bf X})^{-1} {\bf X}^T {\bf Y}$$.
 
 ```{r}
 library(mylm)
 model1 <- mylm(wages ~ education, data = SLID)
 print(model1)
 ```
+MÅ GJØRES -----
 WHAT IS THE INTERPRETATION OF THE PARAMTERER ESTIMATES? 
 
 ## plot.mylm 
 
 The function makes a scatter plot with fitted value on the $x$-axis and residuals on the $y$-axis. The function uses the `ggplot` functionality from the library `ggplot2`. The function is also used to plot the observed values against the residuals. 
 
-The fitted values and residuals calculated with the formulas $\hat{\bf Y}={\bf X}\hat{\beta}$ and $\hat{\varepsilon}&={\bf Y}-\hat{\bf Y}$. 
+### Fitted values and residuals
+
+The fitted values and residuals calculated with the formulas 
+$$\hat{\bf Y}={\bf X}\hat{\beta}$$ 
+$$\hat{\varepsilon}={\bf Y}-\hat{\bf Y}$$. 
 
 ```{r}
 plot(model1)
@@ -100,39 +110,164 @@ plot(model1)
 
 ## summary.mylm
 
-SSE is the residual sum of squares calculated by $\hat{\varepsilon}^T\hat{\varepsilon}$:
+### SSE and SST
+The expressions for the residual sum of squares, SSE and the sums of squares total, SST is 
+$$\text{SSE} = \hat{\varepsilon}^T\hat{\varepsilon}$$
+$$\text{SST} = {\bf Y}^T({\bf I}-\frac{1}{n}{\bf 1 1}^T){\bf Y}$$
+
+The estimated values for the linear model, `model1` 
 ```{r}
 model1$SSE
-```
-$\text{SST} = {\bf Y}^T({\bf I}-\frac{1}{n}{\bf 1 1}^T){\bf Y}$ is the sums of squares total:
-```{r}
 model1$SST
 ```
-The degrees of freedom for a linear model is $n-p$. The degrees of freedom for this model with $p=2$ is:
-```{r}
-model1$df
-```
+
+
+The degrees of freedom for a linear model is $n-p$. This give following value for the linear model: `r model1$df`
+
+
+### $\hat{\sigma}^2, covariance matrix and standard erros$
 
 Estimate for $\sigma^2$ is found by the restricted maximum likelihood estimator
-$\hat{\sigma}^2=frac{\text{SSE}}{n-p}$, and $\hat{\sigma}$ is the residual standard error. 
+$$\hat{\sigma}^2=\frac{\text{SSE}}{n-p}$$
+ and $\hat{\sigma}$ is the residual standard error. 
 From this, the estimated covariance matrix of the parameter estimates can be calulated by $\hat{\sigma}^2({\bf X}^T{\bf X})^{-1}$. The estimate is 
 ```{r}
-model1$comatrix
+model1$covmatrix
 ```
 
-The standard errors of the intercept and regression coefficient are found by taking the square root of the covariance matrix, or ${\sqrt(c_{jj})\hat{\sigma}}$, where $c_{jj}$ is diagonal element $j$ of $({\bf X}^T{\bf X})^{-1})$. 
+The standard errors of the intercept and regression coefficient are found by taking the square root of the covariance matrix, or ${\sqrt{c_{jj}}\hat{\sigma}}$, where $c_{jj}$ is diagonal element $j$ of $({\bf X}^T{\bf X})^{-1}$. 
 ```{r}
 model1$std_error_coeff
 ```
 
-We perform a $z$-test to test the significance of the estimated coefficients. The $z$-values for each coefficient $\hat{\beta_j}$ is caluclated by $\frac{\hat{\beta_j}}{\sqrt(c_{jj})\hat{\sigma}}$. 
+### Significance of estimated coefficients and significance of the regression 
 
+We perform a $z$-test to test the significance of the estimated coefficients. The $z$-values for each coefficient $\hat{\beta_j}$ is caluclated by 
+$$z_{value}=\frac{\hat{\beta_j}}{\sqrt{c_{jj}}\hat{\sigma}}$$. 
 
+We test the significance of the regression using a $\chi^2$-test with $k=p-1$ degrees of freedom. We test if at least one of the regression pramteres is different from 0. The expression for the $\chi^2$-statistics is 
+$$\chi_k^2=\frac{\text{SST}-\text{SSE}}{\frac{\text{SSE}}{n-p}}$$
+MÅ GJØRES -------
+WHAT IS THE RELATIONSHIP BEWTEEN THE TWO z test and chi sq test
 
-## c)
+### $R^2$ and Pearsons linear correlation coefficient
 
+The coefficient of determination, $R^2$ is estimated with the formula $R^2 = 1-SSE/SST$. $R^2$ for this model is `r model1$R_squared`. $R^2$ can take a value between 0 and 1 and closer it is to 1, the better the fit to the data. 
 
+The Pearson's linear correlation coefficient is a measure of the linear correlation between two variables $x_i$ and $x_j$. It has a value between +1 and −1, where 1 is total positive linear correlation, 0 is no linear correlation, and −1 is total negative linear correlation. The expression is 
+$$r = \frac{\text{cov}(x_i,x_j)}{\sigma_{x_i}\sigma_{x_j}}$$. 
+The numerical values for `model1` is
 
-The coefficient of determination, $R^2$ is calculated from the formula $R^2 = 1-SSE/SST$ where $\text{SST} = ${\bf Y}^T({\bf I}-\frac{1}{n}{\bf 1 1}^T){\bf Y}$ is the sums of squares total. 
+```{r}
+model1$linear_corr_coeff
+```
 
-We per
+In `model1`, there is a sligth negative correlation. Hence, an increase in `education` is associated with a decrease in `age`.
+
+The complete output of the function `summary` with `model1`
+```{r}
+summary(model1)
+```
+
+# anova.mylm
+
+In the anova function, the $\chi^2$-test is calculated as for when testing linear hypotheses, but with som changes. Instead of comparing the full regression model to a small model, we are now looking at the change in SSE between two smaller models. 
+
+Let $A$ be the full regression model and $B1$ and $B2$ be two smaller models, for example $B1$ with only intercept and $B2$ with intercept and education. Then the test statistics is:
+$$ \chi_\text{dfB1-dfB2}^2=\frac{\text{SSE}_{B1}-\text{SSE}_{B2}}{\frac{\text{SSE}_A}{\text{df}_A}}$$
+The complete output of the function `anova` with `model1`
+```{r}
+anova(model1)
+```
+
+# Part 3: Multiple linear regression 
+
+We fit a linear regression model to the data with wages as the response with education and age as
+predictors.
+
+```{r}
+model2 <- mylm(wages ~ education+age, data = SLID)
+summary(model2)
+```
+
+Fit two simple linear regression with only age and only education to compare
+
+```{r}
+model2onlyage <- mylm(wages ~ age, data = SLID)
+model2onlyage$coefficients
+model1$coefficients
+```
+
+MÅ GJØRES ------
+Why (and when) does the parameter estimates found (the two simple and the one
+multiple) differ? Explain/show how you can use mylm to find these values.
+
+# Part 4: Analysis of variance (ANOVA)
+
+We fit a linear regression model to the data with `wages` as the response with `sex` and `language` as covariates. `model3a` is using dummy variable coding and `model3b` is using defect coding.
+```{r}
+model3a <- mylm(wages ~ sex + language, data = SLID)
+model3b <- mylm(wages ~ sex + language, data = SLID, contrasts = list(language = "contr.sum",
+sex = "contr.sum"))
+```
+
+```{r}
+summary(model3a)
+summary(model3b)
+```
+
+What are the estimate and standard error of the intercept and effects of factors for this model? Test the
+significance of the factors using a z-test. What is the interpretation of the parameters?
+Do this for both dummy variable and effect coding, and comment briefly on the main differences (e.g., do the
+parameter estimates or the fitted values change?). Notice how the model matrix changes in the two cases.
+
+```{r}
+anova(model3a)
+anova(model3b)
+```
+comment on the results
+
+Why are the commands
+anova(mylm(wages ~ sex + language, data = SLID))
+and
+anova(mylm(wages ~ language + sex, data = SLID))
+giving different results?
+
+```{r}
+model4a <- mylm(wages ~ sex + age + sex*age, data = SLID)
+model4b <- mylm(wages ~ sex + age + sex*age, data = SLID, contrasts = list(language = "contr.sum",
+sex = "contr.sum"))
+```
+What is now the interpretation of the
+parameters, and especially the interaction term?
+Test whether regression coefficients have a common slope or not. Plot the regression lines for the different
+values of sex in the same plot, and perform the test using the plot (use ggplot). Describe the graph. What
+is the conclusion? How can the test be performed without graphs? Does that give the same conclusion?
+
+# Part 5: Testing the `mylm` package
+
+```{r}
+education2 = SLID$education^2
+model5a <- mylm(wages ~ sex + age + language + education2 , data = SLID)
+model5b <- mylm(wages ~ language + age + language*age, data = SLID)
+model5c <- mylm(wages ~ education-1, data = SLID)
+```
+
+```{r}
+summary(model5a)
+```
+Based on the results from each model, write a few sentences about the interpretation and significance of the
+parameters, and mention one small change that could make the model better.
+
+```{r}
+summary(model5b)
+```
+Based on the results from each model, write a few sentences about the interpretation and significance of the
+parameters, and mention one small change that could make the model better.
+
+```{r}
+summary(model5c)
+```
+Based on the results from each model, write a few sentences about the interpretation and significance of the
+parameters, and mention one small change that could make the model better.
+

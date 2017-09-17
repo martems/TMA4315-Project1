@@ -42,7 +42,12 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   R_squared <- 1-SSE/SST
   R_adjusted <- 1 - (n-1)*(1-R_squared)/(n-p)
   residual_standard_error <- sqrt(SSE/(n-p))
-  linear_corr_coeff <- cor(X,use="complete.obs",method="pearson")
+  linear_corr_coeff <- cor(X,method="pearson")
+  if (p <=2){
+    linear_corr_coeff <- linear_corr_coeff[1,1]
+  } else {
+    linear_corr_coeff <- linear_corr_coeff[2:p,2:p]
+  }
 
   #z-test test of significance
   sigmasq <- SSE/(n-p)
@@ -236,8 +241,7 @@ anova.mylm <- function(object, ...){
     } else if (pvalue_chisqX2[i] <= 1)
       signif2[i] = " "
   }
-  anovamatrix <- cbind(Df,SSEdiff,X2_value,pvalue_chisqX2)
-  anovamatrix <- round(anovamatrix,2)
+  anovamatrix <- cbind(Df,round(SSEdiff),round(X2_value),pvalue_chisqX2)
   anovamatrix <- data.frame(anovamatrix)
   anovamatrix <- cbind(anovamatrix,signif2)
   rownames(anovamatrix)=comp
