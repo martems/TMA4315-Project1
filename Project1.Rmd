@@ -66,25 +66,28 @@ We want to study how the qualitative variable `wages` depends on one or more exp
 
 * ${\bf Y}: (n \times 1)$ vector of responses.
 * ${\bf X}: (n \times p)$ design matrix.
-* ${\bf \beta}: (p \times 1)$ vector of regression parameters including the intercept ($p=k+1$).
+* ${\bf \beta}: (p \times 1)$ vector of regression parameters including the intercept ($p = k + 1$).
 * ${\bf \varepsilon}: (n \times 1)$ vector of random errors.
 
-In the following sections; formulas used to make the functions in the `mylm` package will be presented. The functions are used on a linear regression model and the results are presented. 
+We will now create a linear regression model using the `mylm` package, and present the results. We will also present the linear regression formulas used in order to make the functions in the `mylm` package.
 
-## print.mylm 
+## `print.mylm`
 
-This function prints out the call and the estimates of the coefficients. 
+This function invokes the `$call` method of the mylm object, and prints the result in addition to the resulting regression coefficients.
 
 ### Estimates of the regression coefficients
-Estimates of the regression coefficients $\hat\beta$ are calculated with the LS and ML estimator 
-$$\hat\beta=({\bf X}^T{\bf X})^{-1} {\bf X}^T {\bf Y}$$
+Estimates of the regression coefficients $\hat \beta$ are calculated with the least squares (LS) and most likelihood (ML) estimator 
+$$
+\hat \beta = ({\bf X}^T {\bf X})^{-1} {\bf X}^T {\bf Y}.
+$$
 
+An example of how to use `mylm` in order to calculate estimated correlation coefficients follows
 ```{r}
 library(mylm)
 model1 <- mylm(wages ~ education, data = SLID)
 print(model1)
 ```
-The parameter estimates represent the mean change in the response for one unit of change in the predictor variable while holding other predictors in the model constant. The estimated coefficient for `education` is `r model1$coefficients[2]`. The coefficient indicates that for every additional unit in `education`, we can expect `wages` to increase by an average of `r model1$coefficients[2]`.
+The parameter estimates represent the mean estimated change in the response caused by one unit of change in the respective predictor variable while holding other predictors in the model constant. The estimated coefficient for `education` is `r model1$coefficients[2]`. The coefficient indicates that for every additional unit in `education`, we can expect `wages` to increase by an average of `r model1$coefficients[2]`.
 
 ## plot.mylm 
 
