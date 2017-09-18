@@ -142,9 +142,9 @@ summary.mylm <- function(object, ...){
       round(object$coefficients, 4),
       round(data.matrix(object$std_error_coeff), 4),
       round(object$z_stat, 2),
-      object$pvalue_z,
+      object$pvalue_z
     ),
-    nrow = nrow(object$coefficients),
+    nrow = nrow(object$coefficients)
   )
   coeffmatrix <- data.frame(coeffmatrix)
   coeffmatrix <- cbind(coeffmatrix, signif)
@@ -154,7 +154,7 @@ summary.mylm <- function(object, ...){
     "Std. Error",
     "z value",
     "Pr(>|z|)",
-    "   ",
+    "   "
     )
   print(coeffmatrix)
 
@@ -165,14 +165,14 @@ summary.mylm <- function(object, ...){
       object$residual_std_err,
       "on",
       object$df,
-      "degrees of freedom\n",
+      "degrees of freedom\n"
      )
 
   # Adjusted R-squared: ',object$R_adjusted,'\n')
   cat(
       "Multiple R-squared: ",
       object$R_squared,
-      "\n",
+      "\n"
      )
 
   cat(
@@ -184,7 +184,7 @@ summary.mylm <- function(object, ...){
       object$df,
       "DF, ",
       "  p-value: ",
-      object$pvalue_chisq,
+      object$pvalue_chisq
      )
 }
 
