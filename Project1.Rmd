@@ -7,12 +7,13 @@ output: #3rd letter intentation hierarchy
 ###    incremental: true # or >* for one at a time
 #  slidy_presentation:
 #    font_adjustment: +1  
-  prettydoc::html_pretty:
-    theme: architect
-    highlight: github
-#   pdf_document:
-#    toc: true
-#    toc_depth: 2
+ # prettydoc::html_pretty:
+#    theme: architect
+#    highlight: github
+   pdf_document:
+    toc: true
+    toc_depth: 2
+    latex_engine: xelatex
 ---
 
 ```{r setup, include=FALSE}
@@ -71,7 +72,7 @@ We want to study how the qualitative variable `wages` depends on one or more exp
 
 We will now create a linear regression model using the `mylm` package, and present the results. We will also present the linear regression formulas used in order to make the functions in the `mylm` package.
 
-## `print.mylm`
+## a)
 
 This function invokes the `$call` method of the mylm object, and prints the result in addition to the resulting regression coefficients.
 
@@ -87,34 +88,68 @@ library(mylm)
 model1 <- mylm(wages ~ education, data = SLID)
 print(model1)
 ```
+
+## b)
+
+The estimates of the intercept and regression coefficients is presented in Part 2 a)
+
+### $\sigma^2, covariance matrix and standard errors of the parameter estimates$
+In order to find the covariance matrix and standard errors we need the estimate for $\sigma^2$. It is found by the restricted maximum likelihood estimator
+$$
+\hat{\sigma}^2 = \frac{\text{SSE}}{n - p},
+$$
+where $\hat{\sigma}$ is the residual standard error. The residual sum of squares, SSE, is presented in Part 2 d). 
+
+From this, the estimated covariance matrix of the coefficients can be calculated by $\hat{\sigma}^2 ({\bf X}^T {\bf X})^{-1}$. The estimate of the covariance matrix for `model1` is
+```{r}
+model1$covmatrix
+```
+
+The standard errors of the intercept and regression coefficients are found by taking the square root of the covariance matrix, or ${\sqrt{c_{jj}}\hat{\sigma}}$, where $c_{jj}$ is diagonal element $j$ of $({\bf X}^T{\bf X})^{-1}$. For `model1` this gives the following
+```{r}
+model1$std_error_coeff
+```
+
+### Significance of the regression coefficients
+
+We perform a $z$-test to test the significance of the estimated coefficients. The $z$-values for each coefficient $\hat{\beta_j}$ is calculated by 
+$$
+z_{\text{value}} = \frac{\hat{\beta_j}}{\sqrt{c_{jj}} \hat{\sigma}}
+$$
+
+The result from the z-test on `model1` is
+```{r}
+model1$z_stat
+model1$pvalue_z
+```
+
+### Interpretation of the parameter estimates
+
 The parameter estimates represent the mean estimated change in the response caused by one unit of change in the respective predictor variable while holding other predictors in the model constant. The estimated coefficient for `education` is `r model1$coefficients[2]`. The coefficient indicates that for every additional unit in `education`, we can expect `wages` to increase by an average of `r model1$coefficients[2]`.
 
-## `plot.mylm` 
+
+## c) 
 
 This function draws a scatter plot with _fitted_ values on the $x$-axis, and residuals on the $y$-axis, by utilizing the `ggplot` functionality from the `ggplot2` library. It is also used to plot the _observed_ values against the residuals. 
 
 ### Fitted values and residuals
 
 The fitted values and residuals are calculated by the following formulas
-$$
-\hat{\bf Y} = {\bf X} \hat{\beta} 
-\hat{\varepsilon}={\bf Y} - \hat{\bf Y}.
-$$
+$$\hat{\bf Y} = {\bf X}  \hat{\beta} $$
+$$\hat{\varepsilon}={\bf Y} - \hat{\bf Y}$$
 
-And can be drawn in a scatter plot as explained above in the following way
+and can be drawn in a scatter plot as explained above in the following way
 ```{r, results='hide'}
 plot(model1)
 ```
 
-## `summary.mylm`
-`summary.mylm` prints out properties of the linear model intended for analytical purposes, such as...
 
-### SSE and SST
+## d)
+
+### SSE, SST and degrees of freedom
 The expressions for the residual sum of squares ($\text{SSE}$) and the sums of squares total ($\text{SST}$) are
-$$
-\text{SSE} = \hat{\varepsilon}^T \hat{\varepsilon}
-\text{SST} = {\bf Y}^T ({\bf I} - \frac{1}{n} {\bf 1 1}^T){\bf Y}
-$$
+$$\text{SSE} = \hat{\varepsilon}^T \hat{\varepsilon}$$
+$$\text{SST} = {\bf Y}^T ({\bf I} - \frac{1}{n} {\bf 1 1}^T){\bf Y}$$
 
 The calculated values for $\text{SSE}$ and $\text{SST}$ for `model1` is
 ```{r}
@@ -124,30 +159,7 @@ model1$SST
 
 The degrees of freedom for a linear model is $n - p$. For this particular model we therefore have `r model1$n` $-$ `r model1$p` $=$ `r model1$df` degrees of freedom.
 
-### $\hat{\sigma}^2$, covariance matrix and standard errors
-
-The estimate for $\sigma^2$ is found by the restricted maximum likelihood estimator
-$$
-\hat{\sigma}^2 = \frac{\text{SSE}}{n - p},
-$$
-where $\hat{\sigma}$ is the residual standard error. 
-
-From this, the estimated covariance matrix of the parameter estimates can be calculated by $\hat{\sigma}^2 ({\bf X}^T {\bf X})^{-1}$. The estimate of the covariance matrix for `model1` is
-```{r}
-model1$covmatrix
-```
-
-The standard errors of the intercept and regression coefficient are found by taking the square root of the covariance matrix, or ${\sqrt{c_{jj}}\hat{\sigma}}$, where $c_{jj}$ is diagonal element $j$ of $({\bf X}^T{\bf X})^{-1}$. For `model1` this gives the following
-```{r}
-model1$std_error_coeff
-```
-
-### Significance of estimated coefficients and significance of the regression 
-
-We perform a $z$-test to test the significance of the estimated coefficients. The $z$-values for each coefficient $\hat{\beta_j}$ is calculated by 
-$$
-z_{value} = \frac{\hat{\beta_j}}{\sqrt{c_{jj}} \hat{\sigma}}
-$$
+### Sifnificance of the regression 
 
 We test the significance of the regression using a $\chi^2$-test with $k = p - 1$ degrees of freedom. We test if at least one of the regression parameters is different from 0. The expression for the $\chi^2$-statistics is 
 $$
@@ -161,11 +173,24 @@ model1$critical_chi
 
 The $z$-test is a single hypothesis testing where we are interested in testing one null hypothesis against an alternative hypothesis. We test if a regression parameter $\beta_j$ is siginifcant: $H_0:\beta_j=0 \text{ vs. } H_1: \beta_j \neq 0$. We say that our test is done given that the other variables are present in the model are not zero. 
 
-In the $\chi^2$-test we are testing "significance of regression": $H_0: \beta_2=\beta_2=⋯=\beta_k=0 \text{ vs. }.H_1$: at least one different from zero.This means we test if at least one of the regression parameters (in addition to the intercept) is different from 0.
+In the $\chi^2$-test we are testing "significance of regression": $H_0: \beta_2=\beta_2=\cdots\beta_k=0 \text{ vs. }.H_1$: at least one different from zero.This means we test if at least one of the regression parameters (in addition to the intercept) is different from 0.
 
-### $R^2$ and Pearsons linear correlation coefficient
+### ANOVA 
+
+In the anova function, the $\chi^2$-test is calculated as for when testing linear hypotheses, but with som changes. Instead of comparing the full regression model to a small model, we are now looking at the change in SSE between two smaller models. 
+
+Let $A$ be the full regression model and $B1$ and $B2$ be two smaller models, for example $B1$ with only intercept and $B2$ with intercept and education. Then the test statistics is:
+$$ \chi_\text{dfB1-dfB2}^2=\frac{\text{SSE}_{B1}-\text{SSE}_{B2}}{\frac{\text{SSE}_A}{\text{df}_A}}$$
+The complete output of the function `anova` with `model1`
+```{r}
+anova(model1)
+```
+
+## e) 
 
 The coefficient of determination, $R^2$ is estimated with the formula $R^2 = 1-SSE/SST$. $R^2$ for this model is `r model1$R_squared`. $R^2$ can take a value between 0 and 1 and closer it is to 1, the better the fit to the data. 
+
+## f)
 
 The Pearson's linear correlation coefficient is a measure of the linear correlation between two variables $x_i$ and $x_j$. It has a value between +1 and −1, where 1 is total positive linear correlation, 0 is no linear correlation, and −1 is total negative linear correlation. The expression is 
 $$r = \frac{\text{cov}(x_i,x_j)}{\sigma_{x_i}\sigma_{x_j}}$$ 
@@ -177,33 +202,32 @@ model1$linear_corr_coeff
 
 In `model1`, there is a sligth negative correlation. Hence, an increase in `education` is associated with a decrease in `age`.
 
+### Output of `summary`
+
 The complete output of the function `summary` with `model1`
 ```{r}
 summary(model1)
 ```
 
-# anova.mylm
-
-In the anova function, the $\chi^2$-test is calculated as for when testing linear hypotheses, but with som changes. Instead of comparing the full regression model to a small model, we are now looking at the change in SSE between two smaller models. 
-
-Let $A$ be the full regression model and $B1$ and $B2$ be two smaller models, for example $B1$ with only intercept and $B2$ with intercept and education. Then the test statistics is:
-$$ \chi_\text{dfB1-dfB2}^2=\frac{\text{SSE}_{B1}-\text{SSE}_{B2}}{\frac{\text{SSE}_A}{\text{df}_A}}$$
-The complete output of the function `anova` with `model1`
-```{r}
-anova(model1)
-```
-
 # Part 3: Multiple linear regression 
+
+## a)
 
 We fit a linear regression model to the data with `wages` as the response with `education` and `age` as predictors.
 
 ```{r}
 model2 <- mylm(wages ~ education+age, data = SLID)
+```
+
+## b)
+
+```{r}
 summary(model2)
 ```
 
-The estimates and standard errors of the intercepts and regression coefficients for `model2` is presented in the summary above. From the "z"-test we can see that both `education` and `age` is significant in the model. The regression coefficients show that `education` has more effect on the response than `age`. 
+The estimates and standard errors of the intercepts and regression coefficients for `model2` is presented in the summary above. From the $z$-test we can see that both `education` and `age` is significant in the model. The regression coefficients show that `education` has more effect on the response than `age`. 
 
+## c)
 
 We fit two simple linear regression with only age and only education to compare with `model2`. The estimates of the coefficients for the two models are presented below. 
 
@@ -213,10 +237,14 @@ model2onlyage$coefficients
 model1$coefficients
 ```
 
-The parameter estimates differ because the model matrix $X$ changes as we add or remove terms. When does the parameter estimates differ?
+The parameter estimates differ because the model matrix $X$ changes as we add or remove terms. 
+MÅ SVARES PÅ
+When does the parameter estimates differ?
 Explain/show how you can use mylm to find these values.
 
 # Part 4: Analysis of variance (ANOVA)
+
+## a)
 
 We fit a linear regression model to the data with `wages` as the response with `sex` and `language` as covariates. `model3a` is using dummy variable coding and `model3b` is using effect coding.
 ```{r}
@@ -232,13 +260,9 @@ summary(model3b)
 
 Estimates and standard error of the intercept and effects of factors are found in the summarys. In both models, `intercept` and `sex` are significant from the $z$-test. The parameter estimates is different in the two models. In the `model3b` with effect coding we can see that the estimates of the coefficients are smaller than with dummy variable coding, while the intercept is bigger. 
 
-```{r}
-model3a$Y_hat
-summary
-```
-
-
 SKRIVE GJERNE NOE MER 
+
+## b) 
 
 ```{r}
 anova(model3a)
@@ -246,7 +270,7 @@ anova(model3b)
 ```
 
 Sequential anova of the two models `model3a` and `model3b` give the same result. `Sex` is significant when only covariate in the model. `Language` is not significant when added to the model with `intercept` and `sex`.
-
+SKRIV GJERNE NOE MER
 
 ```{r, eval=FALSE}
 anova(mylm(wages ~ sex + language, data = SLID))
@@ -255,6 +279,8 @@ anova(mylm(wages ~ language + sex, data = SLID))
 ```
 
 The commands above give different results because the terms are added sequantially. The commands produce a sequential table of the reductions in residual sum of squares (SSE) as each term in the regression formula is added in turn. Therefore the reductions in SSE will differ as the terms are added in different orders.  
+
+## c)
 
 ```{r}
 model4a <- mylm(wages ~ sex + age + sex*age, data = SLID)
@@ -300,7 +326,7 @@ summary(model5b)
 anova(model5b)
 ```
 The significant terms are `intercept`, `age` and `languageFrench:age`. 
-
+MÅ SKRIVE MER HER
 mention one small change that could make the model better.
 
 ```{r}
