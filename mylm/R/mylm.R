@@ -106,49 +106,86 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
 
 print.mylm <- function(object, ...){
   # Code here is used when print(object) is used on objects of class "mylm"
-  cat('Call:\n')
+  cat("Call:\n")
   print(object$call)
-  cat('\n')
-  cat('Coefficients:\n')
+  cat("\n")
+  cat("Coefficients:\n")
   print(t(object$coefficients))
 }
 
 summary.mylm <- function(object, ...){
   # Code here is used when summary(object) is used on objects of class "mylm"
-  cat('Call\n')
+  cat("Call\n")
   print(object$call)
-  cat('\nResiduals:\n')
-  quantiles<-t(round(object$residual_quantiles,2))
-  colnames(quantiles)=c("Min","1Q","Median","3Q","Max")
+  cat("\nResiduals:\n")
+  quantiles <- t(round(object$residual_quantiles, 2))
+  colnames(quantiles) <- c("Min", "1Q", "Median", "3Q", "Max")
   print(quantiles)
-  cat('\nCoefficients:\n')
-  signif <- vector(mode="character",length=nrow(object$coefficients))
+  cat("\nCoefficients:\n")
+  signif <- vector(mode = "character", length = nrow(object$coefficients))
 
   for (i in 1:nrow(object$coefficients)){
     if (object$pvalue_z[i] < 0.001){
-      signif[i] = "***"
+      signif[i] <- "***"
     } else if (object$pvalue_z[i] < 0.01){
-      signif[i] = "**"
+      signif[i] <- "**"
     } else if (object$pvalue_z[i] < 0.05){
-      signif[i] = "*"
+      signif[i] <- "*"
     } else if (object$pvalue_z[i] < 0.1){
-      signif[i] = "."
+      signif[i] <- "."
     } else if (object$pvalue_z[i] <= 1)
-      signif[i] = " "
+      signif[i] <- " "
   }
 
-  coeffmatrix <- matrix(c(round(object$coefficients,4),round(data.matrix(object$std_error_coeff),4),round(object$z_stat,2),object$pvalue_z),nrow<-nrow(object$coefficients))
+  coeffmatrix <- matrix(
+    c(
+      round(object$coefficients, 4),
+      round(data.matrix(object$std_error_coeff), 4),
+      round(object$z_stat, 2),
+      object$pvalue_z,
+    ),
+    nrow = nrow(object$coefficients),
+  )
   coeffmatrix <- data.frame(coeffmatrix)
-  coeffmatrix <- cbind(coeffmatrix,signif)
-  rownames(coeffmatrix)<-rownames(object$coefficients)
-  colnames(coeffmatrix)<-c("Estimate","Std. Error","z value","Pr(>|z|)","   ")
+  coeffmatrix <- cbind(coeffmatrix, signif)
+  rownames(coeffmatrix) <- rownames(object$coefficients)
+  colnames(coeffmatrix) <- c(
+    "Estimate",
+    "Std. Error",
+    "z value",
+    "Pr(>|z|)",
+    "   ",
+    )
   print(coeffmatrix)
 
-  cat('\nSignif. codes: 0 ´***´ 0.001 ´**´ 0.01 ´*´ 0.05 ´.´ 0.1 ´ ´ 1\n')
-  cat('\nResidual standard error: ', object$residual_std_err, 'on',object$df,'degrees of freedom\n')
-  cat('Multiple R-squared: ', object$R_squared, '\n') #    Adjusted R-squared: ',object$R_adjusted,'\n')
-  cat('Chisquared-statistics: ', object$chisq_stat, 'on', object$k, 'and', object$df, 'DF, ', '  p-value: ', object$pvalue_chisq)
+  cat("\nSignif. codes: 0 ´***´ 0.001 ´**´ 0.01 ´*´ 0.05 ´.´ 0.1 ´ ´ 1\n")
 
+  cat(
+      "\nResidual standard error: ",
+      object$residual_std_err,
+      "on",
+      object$df,
+      "degrees of freedom\n",
+     )
+
+  # Adjusted R-squared: ',object$R_adjusted,'\n')
+  cat(
+      "Multiple R-squared: ",
+      object$R_squared,
+      "\n",
+     )
+
+  cat(
+      "Chisquared-statistics: ",
+      object$chisq_stat,
+      "on",
+      object$k,
+      "and",
+      object$df,
+      "DF, ",
+      "  p-value: ",
+      object$pvalue_chisq,
+     )
 }
 
 plot.mylm <- function(object, ...){
