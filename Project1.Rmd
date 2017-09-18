@@ -23,31 +23,26 @@ library(GGally, quietly = TRUE, warn.conflicts = FALSE)
 ```
 
 # Part 1: Explanatory analysis of the dataset 
+We will investigate the SLID dataset from the "car" library, by drawing a scatter plot of all the variables.
 
 ```{r, quietly=TRUE}
 data(SLID, package = "car")
 SLID <- SLID[complete.cases(SLID), ]
-
-summary(SLID)
-
-levels(SLID$sex)
-levels(SLID$language)
-
 g <- ggpairs(SLID)
-g
-
-lm <- lm(formula = wages~education+age+sex+language, data=SLID)
-summary(lm)
 ```
-There is a positive correlation between education/age and wages, as expected. The general level of education is lower for older age segments, indicating that higher education has become more prevalent amongst yonger people. Women's average pay is lower than men's.
+
+### Observations
+* There is a positive correlation between education/age and wages, as expected.
+* The general level of education is lower for older age segments, indicating that higher education has become more prevalent amongst yonger people.
+* We also observe that women's average pay is lower than men's.
  
-## Assumptions of multiple linear regression (MLR) analysis
+### Assumptions of multiple linear regression (MLR) analysis
 If we want to perform MLR analysis, the following must hold true:
  
-   1. Wages ($Y$) must be a linear response to the covariates ($X$), education, age, sex and language. $Y = X\beta + \epsilon$.
-   2. The error needs to have equal and uncorrelated variance for each covariate. $\text{Var}(\varepsilon) = \sigma^2 I$.
+   1. Wages must be a linear response to the covariates, education, age, sex and language, i.e. $\bf Y = \bf X\bf \beta + \bf \epsilon$.
+   2. The error needs to have equal and uncorrelated variance for each covariate, i.e. $\text{Var}(\varepsilon) = \sigma^2 I$.
    3. Errors need to be additive (see formula related to pt. 1).
-   4. Errors need to be normally distributed. $\varepsilon \sim N_n(0, \sigma^2 I)$.
+   4. Errors need to be normally distributed, i.e. $\varepsilon \sim N_n(0, \sigma^2 I)$.
 
 # Part 2: Linear regression with mylm package
 In this project we have created our own R-package, `mylm`, to handle linear models for Gaussian data and we use this package to analyse a dataset. 
