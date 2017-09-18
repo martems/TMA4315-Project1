@@ -19,11 +19,10 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   y  <- model.response(mf)
   terms <- attr(mf, "terms")
 
-
   # Add code here to calculate coefficients, residuals, fitted values, etc...
   # and store the results in the list est
 
-  #Coefficients, residuals
+  #Coefficients, residuals, df, residual quantiles
   coefficients <- solve(t(X)%*%X)%*%t(X)%*%y
   Y_hat <- X%*%coefficients
   residuals <- y-Y_hat
@@ -32,15 +31,13 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   k <- p-1
   df <- n-p
   residual_quantiles <- quantile(residuals)
-  # min max quantiles of residuals
 
-  #SSE, SST, R squared, residual standard error
+  #SSE, SST, R squared, residual standard error, Pearsons linear corr coefficient
   SSE <- t(residuals)%*%residuals
   I <- diag(n)
   J <- matrix(1,nrow=n,ncol=n)
   SST <- t(y)%*%(I-J/n)%*%y
   R_squared <- 1-SSE/SST
-  R_adjusted <- 1 - (n-1)*(1-R_squared)/(n-p)
   residual_standard_error <- sqrt(SSE/(n-p))
   linear_corr_coeff <- cor(X,method="pearson")
   if (p <=2){
@@ -49,7 +46,7 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
     linear_corr_coeff <- linear_corr_coeff[2:p,2:p]
   }
 
-  #z-test test of significance
+  #sigma^2, covariance matrix, z-test test of significance
   sigmasq <- SSE/(n-p)
   sigmasq <- sigmasq[1,1]
   covmatrix <- sigmasq*solve(t(X)%*%X)
@@ -76,14 +73,17 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   est$Y_hat <- Y_hat
   est$coefficients <- coefficients
   est$residuals <- residuals
-  est$SSE <- SSE
-  est$SST <- SST
-  est$R_squared <- R_squared
-  est$R_adjusted <- R_adjusted
   est$n <- n
   est$p <- p
   est$k <- k
   est$df <- df
+  est$residual_quantiles <- residual_quantiles
+
+  est$SSE <- SSE
+  est$SST <- SST
+  est$R_squared <- R_squared
+  est$residual_std_err <- residual_standard_error
+
   est$sigma_sq <- sigmasq
   est$covmatrix <- covmatrix
   est$std_error_coeff <- std_coefficients
@@ -91,14 +91,10 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   est$pvalue_z <- pvalue_z
   est$chisq_stat <- chisq
   est$pvalue_chisq <- pvalue_chisq
-  est$residual_std_err <- residual_standard_error
-  est$residual_quantiles <- residual_quantiles
+
   est$critical_z <- critical_z
   est$critical_chi <- critical_chi
   est$linear_corr_coeff <- linear_corr_coeff
-
-
-
 
   # Set class name. This is very important!
   class(est) <- 'mylm'
@@ -109,7 +105,6 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
 
 print.mylm <- function(object, ...){
   # Code here is used when print(object) is used on objects of class "mylm"
-  # Useful functions include cat, print.default and format
   cat('Call:\n')
   print(object$call)
   cat('\n')
@@ -119,17 +114,15 @@ print.mylm <- function(object, ...){
 
 summary.mylm <- function(object, ...){
   # Code here is used when summary(object) is used on objects of class "mylm"
-  # Useful functions include cat, print.default and format
   cat('Call\n')
   print(object$call)
   cat('\nResiduals:\n')
-  #print.default(object$residual_quantiles,digits=3,quote=FALSE)
   quantiles<-t(round(object$residual_quantiles,2))
   colnames(quantiles)=c("Min","1Q","Median","3Q","Max")
   print(quantiles)
   cat('\nCoefficients:\n')
   signif <- vector(mode="character",length=nrow(object$coefficients))
-  #print(signif)
+
   for (i in 1:nrow(object$coefficients)){
     if (object$pvalue_z[i] < 0.001){
       signif[i] = "***"
@@ -142,6 +135,7 @@ summary.mylm <- function(object, ...){
     } else if (object$pvalue_z[i] <= 1)
       signif[i] = " "
   }
+
   coeffmatrix <- matrix(c(round(object$coefficients,4),round(data.matrix(object$std_error_coeff),4),round(object$z_stat,2),object$pvalue_z),nrow<-nrow(object$coefficients))
   coeffmatrix <- data.frame(coeffmatrix)
   coeffmatrix <- cbind(coeffmatrix,signif)
@@ -183,6 +177,7 @@ anova.mylm <- function(object, ...){
   # Fit the sequence of models
   txtFormula <- paste(response, "~", sep = "")
 
+  # Fit model with only intercept
   no = txtFormula
   no = paste(no,1)
   formulano = formula(no)
@@ -200,11 +195,10 @@ anova.mylm <- function(object, ...){
     model[[numComp]] <- lm(formula = formula, data = object$model)
   }
 
-
   SSE <- vector()
   SSEdiff <- vector()
   SSE_nocoeff <- t(model_nocoeff$residuals)%*%model_nocoeff$residuals
-  SSE[1] = SSE_nocoeff
+  SSE[1] <- SSE_nocoeff
   Res.Df <- vector()
   Res.Df[1] <- model_nocoeff$df.residual
   Df <-vector()
@@ -240,16 +234,13 @@ anova.mylm <- function(object, ...){
     } else if (pvalue_chisqX2[i] <= 1)
       signif2[i] = " "
   }
-  anovamatrix <- cbind(Df,round(SSEdiff),round(X2_value),pvalue_chisqX2)
+  anovamatrix <- cbind(Df,round(SSEdiff),round(X2_value,2),pvalue_chisqX2)
   anovamatrix <- data.frame(anovamatrix)
   anovamatrix <- cbind(anovamatrix,signif2)
-  rownames(anovamatrix)=comp
-  colnames(anovamatrix)=c("Df","Sum sq","X2 value","Pr(>X2)","   ")
+  rownames(anovamatrix) <- comp
+  colnames(anovamatrix) <- c("Df","Sum sq","X2 value","Pr(>X2)","   ")
   print(anovamatrix)
   cat("Residuals ", tail(Res.Df,n=1), tail(SSE,n=1), round(tail(SSE,n=1)/tail(Res.Df,n=1)))
-
-
-
 
   #return(model)
 

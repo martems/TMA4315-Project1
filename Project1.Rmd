@@ -7,7 +7,7 @@ output: #3rd letter intentation hierarchy
 ###    incremental: true # or >* for one at a time
 #  slidy_presentation:
 #    font_adjustment: +1  
-   prettydoc::html_pretty:
+  prettydoc::html_pretty:
     theme: architect
     highlight: github
 #   pdf_document:
@@ -88,8 +88,7 @@ library(mylm)
 model1 <- mylm(wages ~ education, data = SLID)
 print(model1)
 ```
-MÅ GJØRES -----
-WHAT IS THE INTERPRETATION OF THE PARAMTERER ESTIMATES? 
+The parameter estimates represent the mean change in the response for one unit of change in the predictor variable while holding other predictors in the model constant. The estimated coefficient for `education` is `r model1$coefficients[2]`. The coefficient indicates that for every additional unit in `education`, we can expect `wages` to increase by an average of `r model1$coefficients[2]`.
 
 ## plot.mylm 
 
@@ -97,7 +96,7 @@ The function makes a scatter plot with fitted value on the $x$-axis and residual
 
 ### Fitted values and residuals
 
-The fitted values and residuals calculated with the formulas 
+The fitted values and residuals calculated by the following expressions
 $$\hat{\bf Y}={\bf X}\hat{\beta}$$ 
 $$\hat{\varepsilon}={\bf Y}-\hat{\bf Y}$$
 
@@ -119,8 +118,7 @@ model1$SST
 ```
 
 
-The degrees of freedom for a linear model is $n-p$. This give following value for the linear model: `r model1$df`
-
+The degrees of freedom for a linear model is $n-p$. This give following value for `model1`: `r model1$df`
 
 ### $\hat{\sigma}^2$, covariance matrix and standard erros
 
@@ -150,9 +148,9 @@ model1$critical_z
 model1$critical_chi
 ```
 
+The $z$-test is a single hypothesis testing where we are interested in testing one null hypothesis against an alternative hypothesis. We test if a regression parameter $\beta_j$ is siginifcant: $H_0:\beta_j=0 \text{ vs. } H_1: \beta_j \neq 0$. We say that our test is done given that the other variables are present in the model are not zero. 
 
-MÅ GJØRES -------
-WHAT IS THE RELATIONSHIP BEWTEEN THE TWO z test and chi sq test
+In the $\chi^2$-test we are testing "significance of regression": $H_0: \beta_2=\beta_2=⋯=\beta_k=0 \text{ vs. }.H_1$: at least one different from zero.This means we test if at least one of the regression parameters (in addition to the intercept) is different from 0.
 
 ### $R^2$ and Pearsons linear correlation coefficient
 
@@ -193,13 +191,10 @@ model2 <- mylm(wages ~ education+age, data = SLID)
 summary(model2)
 ```
 
-MÅ GJØRES ---------
-What are the estimates and standard errors of the intercepts and regression coefficients for this model? Test
-the significance of the coefficients using a z-test. What is the interpretation of the parameters?
+The estimates and standard errors of the intercepts and regression coefficients for `model2` is presented in the summary above. From the "z"-test we can see that both `education` and `age` is significant in the model. The regression coefficients show that `education` has more effect on the response than `age`. 
 
 
-
-We fit two simple linear regression with only age and only education to compare
+We fit two simple linear regression with only age and only education to compare with `model2`. The estimates of the coefficients for the two models are presented below. 
 
 ```{r}
 model2onlyage <- mylm(wages ~ age, data = SLID)
@@ -207,13 +202,12 @@ model2onlyage$coefficients
 model1$coefficients
 ```
 
-MÅ GJØRES ------
-Why (and when) does the parameter estimates found (the two simple and the one
-multiple) differ? Explain/show how you can use mylm to find these values.
+The parameter estimates differ because the model matrix $X$ changes as we add or remove terms. When does the parameter estimates differ?
+Explain/show how you can use mylm to find these values.
 
 # Part 4: Analysis of variance (ANOVA)
 
-We fit a linear regression model to the data with `wages` as the response with `sex` and `language` as covariates. `model3a` is using dummy variable coding and `model3b` is using defect coding.
+We fit a linear regression model to the data with `wages` as the response with `sex` and `language` as covariates. `model3a` is using dummy variable coding and `model3b` is using effect coding.
 ```{r}
 model3a <- mylm(wages ~ sex + language, data = SLID)
 model3b <- mylm(wages ~ sex + language, data = SLID, contrasts = list(language = "contr.sum",
@@ -225,24 +219,31 @@ summary(model3a)
 summary(model3b)
 ```
 
-MÅ GJØRES------
-What are the estimate and standard error of the intercept and effects of factors for this model? Test the
-significance of the factors using a z-test. What is the interpretation of the parameters?
-Do this for both dummy variable and effect coding, and comment briefly on the main differences (e.g., do the
-parameter estimates or the fitted values change?). Notice how the model matrix changes in the two cases.
+Estimates and standard error of the intercept and effects of factors are found in the summarys. In both models, `intercept` and `sex` are significant from the $z$-test. The parameter estimates is different in the two models. In the `model3b` with effect coding we can see that the estimates of the coefficients are smaller than with dummy variable coding, while the intercept is bigger. 
+
+```{r}
+model3a$Y_hat
+summary
+```
+
+
+SKRIVE GJERNE NOE MER 
 
 ```{r}
 anova(model3a)
 anova(model3b)
 ```
-ANOVA GIR SAMME RESULTAT FOR DUMMY OG EFFECT TROR VI MÅ GJØRE NOE ENDRINGER I ANOVA VET IKKE HVORDAN
-MÅ GJØRES-----
-comment on the results
-Why are the commands
+
+Sequential anova of the two models `model3a` and `model3b` give the same result. `Sex` is significant when only covariate in the model. `Language` is not significant when added to the model with `intercept` and `sex`.
+
+
+```{r, eval=FALSE}
 anova(mylm(wages ~ sex + language, data = SLID))
 and
 anova(mylm(wages ~ language + sex, data = SLID))
-giving different results?
+```
+
+The commands above give different results because the terms are added sequantially. The commands produce a sequential table of the reductions in residual sum of squares (SSE) as each term in the regression formula is added in turn. Therefore the reductions in SSE will differ as the terms are added in different orders.  
 
 ```{r}
 model4a <- mylm(wages ~ sex + age + sex*age, data = SLID)
@@ -250,9 +251,17 @@ model4b <- mylm(wages ~ sex + age + sex*age, data = SLID, contrasts = list(langu
 sex = "contr.sum"))
 ```
 
+In `model4a` and `model4b` have added an interaction term to the model where the two predictor variablaes are multiplied. The presence of a significant interaction indicates that the effect of one predictor variable on the response variable is different at different values of the other predictor variable. 
+
+```{r}
+model4a$coefficients
+model4b$coefficients
+```
+
+Adding an interaction term to the model changes the interpretation of all of the coefficients. If there were no interaction term, the coefficient for `age` would be interpreted as the unique effect of `age` one the respons. But the interaction means that the effect of `age` is different for different values of `sex`.  So the unique effect of `sage` on `wages` also depends on the values of the interaction coefficient and `sex`. The unique effect of `age` is represented by everything that is multiplied by `age` in the model. The coefficient for `age` alone is now interpreted as the unique effect of `age` on only when `sex`= 0.
+
 MÅ GJØRES-------
-What is now the interpretation of the
-parameters, and especially the interaction term?
+
 Test whether regression coefficients have a common slope or not. Plot the regression lines for the different
 values of sex in the same plot, and perform the test using the plot (use ggplot). Describe the graph. What
 is the conclusion? How can the test be performed without graphs? Does that give the same conclusion?
@@ -260,7 +269,7 @@ is the conclusion? How can the test be performed without graphs? Does that give 
 # Part 5: Testing the `mylm` package
 
 ```{r}
-education2 = SLID$education^2
+education2 = SLID$education^2 #square eudcation
 model5a <- mylm(wages ~ sex + age + language + education2 , data = SLID)
 model5b <- mylm(wages ~ language + age + language*age, data = SLID)
 model5c <- mylm(wages ~ education-1, data = SLID)
@@ -268,20 +277,24 @@ model5c <- mylm(wages ~ education-1, data = SLID)
 
 ```{r}
 summary(model5a)
+anova(model5a)
 ```
-MÅ GJØRES---
-Based on the results from each model, write a few sentences about the interpretation and significance of the
-parameters, and mention one small change that could make the model better.
+
+From the summary we see that `sexMale`, `age` and `education2` are significant in the model. We see that all the singificant covariates have a positive impact on the response. $R^2=$ `r model5a$R_squared`, so the model only explain 30% of the variablility in the data. Language is not significiant so an idea would be to remove this from the model. 
+
+MÅ KOMMENTERE NOE PÅ ANOVA 
 
 ```{r}
 summary(model5b)
+anova(model5b)
 ```
-MÅ GJØRES----
-Based on the results from each model, write a few sentences about the interpretation and significance of the
-parameters, and mention one small change that could make the model better.
+The significant terms are `intercept`, `age` and `languageFrench:age`. 
+
+mention one small change that could make the model better.
 
 ```{r}
 summary(model5c)
+anova(model5c)
 ```
 MÅ GJØRES----
 Based on the results from each model, write a few sentences about the interpretation and significance of the
