@@ -89,35 +89,40 @@ print(model1)
 ```
 The parameter estimates represent the mean estimated change in the response caused by one unit of change in the respective predictor variable while holding other predictors in the model constant. The estimated coefficient for `education` is `r model1$coefficients[2]`. The coefficient indicates that for every additional unit in `education`, we can expect `wages` to increase by an average of `r model1$coefficients[2]`.
 
-## plot.mylm 
+## `plot.mylm` 
 
-The function makes a scatter plot with fitted value on the $x$-axis and residuals on the $y$-axis. The function uses the `ggplot` functionality from the library `ggplot2`. The function is also used to plot the observed values against the residuals. 
+This function draws a scatter plot with _fitted_ values on the $x$-axis, and residuals on the $y$-axis, by utilizing the `ggplot` functionality from the `ggplot2` library. It is also used to plot the _observed_ values against the residuals. 
 
 ### Fitted values and residuals
 
-The fitted values and residuals calculated by the following expressions
-$$\hat{\bf Y}={\bf X}\hat{\beta}$$ 
-$$\hat{\varepsilon}={\bf Y}-\hat{\bf Y}$$
+The fitted values and residuals are calculated by the following formulas
+$$
+\hat{\bf Y} = {\bf X} \hat{\beta} 
+\hat{\varepsilon}={\bf Y} - \hat{\bf Y}.
+$$
 
-```{r}
+And can be drawn in a scatter plot as explained above in the following way
+```{r, results='hide'}
 plot(model1)
 ```
 
-## summary.mylm
+## `summary.mylm`
+`summary.mylm` prints out properties of the linear model intended for analytical purposes, such as...
 
 ### SSE and SST
-The expressions for the residual sum of squares, SSE and the sums of squares total, SST is 
-$$\text{SSE} = \hat{\varepsilon}^T\hat{\varepsilon}$$
-$$\text{SST} = {\bf Y}^T({\bf I}-\frac{1}{n}{\bf 1 1}^T){\bf Y}$$
+The expressions for the residual sum of squares ($\text{SSE}$) and the sums of squares total ($\text{SST}$) are
+$$
+\text{SSE} = \hat{\varepsilon}^T \hat{\varepsilon}
+\text{SST} = {\bf Y}^T ({\bf I} - \frac{1}{n} {\bf 1 1}^T){\bf Y}
+$$
 
-The estimated values for the linear model, `model1` 
+The calculated values for $\text{SSE}$ and $\text{SST}$ for `model1` is
 ```{r}
 model1$SSE
 model1$SST
 ```
 
-
-The degrees of freedom for a linear model is $n-p$. This give following value for `model1`: `r model1$df`
+The degrees of freedom for a linear model is $n - p$. For this particular model we therefore have `r model1$df` degrees of freedom.
 
 ### $\hat{\sigma}^2$, covariance matrix and standard erros
 
