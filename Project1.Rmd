@@ -40,7 +40,7 @@ g <- ggpairs(SLID)
 ## Assumptions of multiple linear regression (MLR) analysis
 If we want to perform MLR analysis, the following must hold true:
  
-   1. Wages must be a linear response to the covariates, education, age, sex and language, i.e. $\bf Y = \bf X\bf \beta + \bf \epsilon$.
+   1. Wages must be a linear response to the covariates, education, age, sex and language, i.e. $\bf Y = \bf X\bf \beta + \bf \varepsilon$.
    2. The error needs to have equal and uncorrelated variance for each covariate, i.e. $\text{Var}(\varepsilon) = \sigma^2 I$.
    3. Errors need to be additive (see formula related to pt. 1).
    4. Errors need to be normally distributed, i.e. $\varepsilon \sim N_n(0, \sigma^2 I)$.
@@ -93,7 +93,7 @@ print(model1)
 
 The estimates of the intercept and regression coefficients is presented in Part 2 a)
 
-### $\sigma^2, covariance matrix and standard errors of the parameter estimates$
+### $\sigma^2$, covariance matrix and standard errors of the parameter estimates
 In order to find the covariance matrix and standard errors we need the estimate for $\sigma^2$. It is found by the restricted maximum likelihood estimator
 $$
 \hat{\sigma}^2 = \frac{\text{SSE}}{n - p},
