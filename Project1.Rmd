@@ -144,11 +144,15 @@ model1$std_error_coeff
 
 ### Significance of estimated coefficients and significance of the regression 
 
-We perform a $z$-test to test the significance of the estimated coefficients. The $z$-values for each coefficient $\hat{\beta_j}$ is caluclated by 
-$$z_{value}=\frac{\hat{\beta_j}}{\sqrt{c_{jj}}\hat{\sigma}}$$
+We perform a $z$-test to test the significance of the estimated coefficients. The $z$-values for each coefficient $\hat{\beta_j}$ is calculated by 
+$$
+z_{value} = \frac{\hat{\beta_j}}{\sqrt{c_{jj}} \hat{\sigma}}
+$$
 
-We test the significance of the regression using a $\chi^2$-test with $k=p-1$ degrees of freedom. We test if at least one of the regression pramteres is different from 0. The expression for the $\chi^2$-statistics is 
-$$\chi_k^2=\frac{\text{SST}-\text{SSE}}{\frac{\text{SSE}}{n-p}}$$
+We test the significance of the regression using a $\chi^2$-test with $k = p - 1$ degrees of freedom. We test if at least one of the regression parameters is different from 0. The expression for the $\chi^2$-statistics is 
+$$
+\chi_k^2 = \frac{\text{SST} - \text{SSE}} {\frac{\text{SSE}}{n - p}}.
+$$
 The critical values for the tests are
 ```{r}
 model1$critical_z
