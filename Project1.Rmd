@@ -31,12 +31,12 @@ SLID <- SLID[complete.cases(SLID), ]
 g <- ggpairs(SLID)
 ```
 
-### Observations
+## Observations
 * There is a positive correlation between education/age and wages, as expected.
-* The general level of education is lower for older age segments, indicating that higher education has become more prevalent amongst yonger people.
+* The general level of education is lower for older age segments, indicating that higher education has become more prevalent amongst younger people.
 * We also observe that women's average pay is lower than men's.
  
-### Assumptions of multiple linear regression (MLR) analysis
+## Assumptions of multiple linear regression (MLR) analysis
 If we want to perform MLR analysis, the following must hold true:
  
    1. Wages must be a linear response to the covariates, education, age, sex and language, i.e. $\bf Y = \bf X\bf \beta + \bf \epsilon$.
@@ -45,30 +45,31 @@ If we want to perform MLR analysis, the following must hold true:
    4. Errors need to be normally distributed, i.e. $\varepsilon \sim N_n(0, \sigma^2 I)$.
 
 # Part 2: Linear regression with mylm package
-In this project we have created our own R-package, `mylm`, to handle linear models for Gaussian data and we use this package to analyse a dataset. 
-The dataset consists of 3987 observations on the following 5 variables:
+In this project we have created our own R-package, named `mylm`, to handle linear models for Gaussian data. We will use this package in order to analyze an example dataset.
+The example dataset consists of $n = 3987$ observations of the following 5 variables:
 
-* `print.mylm`, gives the call to the mylm-function and the estimates of the coefficients
-* `plot.mylm`, makes a scatter plot with fitted values and residuals
-* `summary.mylm`, returns a list of summary statistics of the fitted linear model like coefficients, standard errors, test of significance etc. 
-* `anova,mylm`, gives the results of a sequential ANOVA
+* `wages`: composite hourly wage rate from all jobs.
+* `education`: number of years in schooling.
+* `age`: in years.
+* `sex`: Male or Female.
+* `language`: English, French or Other.
 
-We want to study how the qualitative variable `wages` depens on one or more explanatory variables. The package constists of the following functions: 
+We want to study how the qualitative variable `wages` depends on one or more explanatory variables. The `mylm` package consists of the following functions: 
 
-* `wages`, composite hourly wage rate from all jobs
-* `education`, number of years in schooling
-* `age`, in years
-* `sex`, Male or Female
-* `language`, English, French or Other
+* `print.mylm`: invokes the `mylm` function and prints the result, including the estimated regression coefficients.
+* `plot.mylm`: draws a scatter plot with fitted values and residuals.
+* `summary.mylm`: returns a list of summary statistics of the fitted linear model, e.g. coefficients, standard errors, tests of significance, and so on.
+* `anova.mylm`: gives the results of a sequential ANOVA.
+
 
 ### Notation:
 
-* ${\bf Y}: (n \times 1)$ vector of responses
-* ${\bf X}: (n \times p)$ design matrix
-* ${\bf \beta}: (p \times 1)$ vector of regression paramteres inlcuding the intercept ($p=k+1$)
-* ${\bf \varepsilon}: (n \times 1)$ vector of random errors
+* ${\bf Y}: (n \times 1)$ vector of responses.
+* ${\bf X}: (n \times p)$ design matrix.
+* ${\bf \beta}: (p \times 1)$ vector of regression parameters including the intercept ($p=k+1$).
+* ${\bf \varepsilon}: (n \times 1)$ vector of random errors.
 
-In the following sections formulas used to make the functions in the `mylm` package will be presented. The functions are used on a linear regression model and the results are presented. 
+In the following sections; formulas used to make the functions in the `mylm` package will be presented. The functions are used on a linear regression model and the results are presented. 
 
 ## print.mylm 
 
