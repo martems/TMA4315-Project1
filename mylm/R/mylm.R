@@ -190,15 +190,37 @@ summary.mylm <- function(object, ...){
 
 plot.mylm <- function(object, ...){
   # Code here is used when plot(object) is used on objects of class "mylm"
-  plotfit <- data.frame(fitvals = object$Y_hat, residuals = object$residuals,
-                       obsvals = object$y)
   library(ggplot2)
 
-  fittedvals_plot <- ggplot(plotfit,aes(fitvals, residuals)) + geom_point(pch = 21) + geom_hline(yintercept = 0, linetype ="dashed") + labs(x = "Fitted values", y = "Residuals", title = "Residuals vs Fitted values",subtitle = deparse(object$call))
-  #+ geom_hline(yintercept = 0,linetype = "dashed") + geom_smooth(se = FALSE, col = "red", size = 0.5, method = "loess")
-  obsvals_plot <- ggplot(plotfit,aes(obsvals, residuals)) + geom_point(pch = 21) + geom_hline(yintercept = 0, linetype ="dashed") + labs(x = "Observed values", y = "Residuals", title = "Residuals vs Observed values",subtitle = deparse(object$call))
-  # if you want the plot to look nice, you can e.g. use "labs" to add labels, and add colors in the geom_point-function
-  list_plot <- list(fittedvals_plot,obsvals_plot)
+  plotfit <- data.frame(
+    fitvals = object$Y_hat,
+    residuals = object$residuals,
+    obsvals = object$y
+  )
+
+  fittedvals_plot <- ggplot(plotfit, aes(fitvals, residuals)) +
+    geom_point(pch = 21) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    labs(
+      x = "Fitted values",
+      y = "Residuals",
+      title = "Residuals vs Fitted values",
+      subtitle = deparse(object$call)
+    )
+
+  obsvals_plot <- ggplot(plotfit, aes(obsvals, residuals)) +
+    geom_point(pch = 21) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    labs(
+      x = "Observed values",
+      y = "Residuals",
+      title = "Residuals vs Observed values",
+      subtitle = deparse(object$call)
+    )
+
+  # if you want the plot to look nice, you can e.g. use "labs" to add labels,
+    # and add colors in the geom_point-function
+  list_plot <- list(fittedvals_plot, obsvals_plot)
 
   return(list_plot)
 }
@@ -216,10 +238,10 @@ anova.mylm <- function(object, ...){
   txtFormula <- paste(response, "~", sep = "")
 
   # Fit model with only intercept
-  no = txtFormula
-  no = paste(no,1)
-  formulano = formula(no)
-  model_nocoeff <- lm(formula = formulano,data=object$model)
+  no <- txtFormula
+  no <- paste(no, 1)
+  formulano <- formula(no)
+  model_nocoeff <- lm(formula = formulano, data = object$model)
 
   model <- list()
   for(numComp in 1:length(comp)){
@@ -235,52 +257,63 @@ anova.mylm <- function(object, ...){
 
   SSE <- vector()
   SSEdiff <- vector()
-  SSE_nocoeff <- t(model_nocoeff$residuals)%*%model_nocoeff$residuals
+  SSE_nocoeff <- t(model_nocoeff$residuals) %*% model_nocoeff$residuals
   SSE[1] <- SSE_nocoeff
   Res.Df <- vector()
   Res.Df[1] <- model_nocoeff$df.residual
-  Df <-vector()
+  Df <- vector()
   MeanSSE <- vector()
   X2_value <- vector()
   pvalue_chisqX2 <- vector()
+
   # Print Analysis of Variance Table
   cat('Analysis of Variance Table\n')
   cat(c('Response: ', response, '\n'), sep = '')
-  #cat('          Df  sq X2 value Pr(>X2)\n')
 
   for(numComp in 1:length(comp)){
-    SSE[numComp+1] <- t(model[[numComp]]$residuals)%*%model[[numComp]]$residuals
-    SSEdiff[numComp] <- SSE[numComp]-SSE[numComp+1]
-    Res.Df[numComp+1] <- model[[numComp]]$df.residual
-    Df[numComp] <- Res.Df[numComp] - Res.Df[numComp+1]
-    MeanSSE[numComp] <- SSEdiff[numComp]/Df[numComp]
+    SSE[numComp + 1] <- t(model[[numComp]]$residuals) %*% model[[numComp]]$residuals
+    SSEdiff[numComp] <- SSE[numComp] - SSE[numComp + 1]
+    Res.Df[numComp + 1] <- model[[numComp]]$df.residual
+    Df[numComp] <- Res.Df[numComp] - Res.Df[numComp + 1]
+    MeanSSE[numComp] <- SSEdiff[numComp] / Df[numComp]
   }
   for(numComp2 in 1:length(comp)){
-    X2_value[numComp2] <- SSEdiff[numComp2]/(SSE[length(comp)]/Res.Df[length(comp)])
-    pvalue_chisqX2[numComp2] <- pchisq(X2_value[numComp2], df=Df[numComp2], lower.tail = FALSE)
+    X2_value[numComp2] <- SSEdiff[numComp2] / (SSE[length(comp)] / Res.Df[length(comp)])
+    pvalue_chisqX2[numComp2] <- pchisq(
+      X2_value[numComp2],
+      df = Df[numComp2],
+      lower.tail = FALSE
+    )
   }
-  signif2 <- vector(mode="character",length=length(comp))
+  signif2 <- vector(mode = "character", length = length(comp))
   for (i in 1:length(pvalue_chisqX2)){
     if (pvalue_chisqX2[i] < 0.001){
-      signif2[i] = "***"
+      signif2[i] <- "***"
     } else if (pvalue_chisqX2[i] < 0.01){
-      signif2[i] = "**"
+      signif2[i] <- "**"
     } else if (pvalue_chisqX2[i] < 0.05){
-      signif2[i] = "*"
+      signif2[i] <- "*"
     } else if (pvalue_chisqX2[i] < 0.1){
-      signif2[i] = "."
-    } else if (pvalue_chisqX2[i] <= 1)
-      signif2[i] = " "
+      signif2[i] <- "."
+    } else if (pvalue_chisqX2[i] <= 1){
+      signif2[i] <- " "
+    } else {
+      warning("Calulated P-value >= 1")
+    }
   }
-  anovamatrix <- cbind(Df,round(SSEdiff),round(X2_value,2),pvalue_chisqX2)
+  anovamatrix <- cbind(
+    Df,
+    round(SSEdiff),
+    round(X2_value, 2),
+    pvalue_chisqX2
+  )
   anovamatrix <- data.frame(anovamatrix)
-  anovamatrix <- cbind(anovamatrix,signif2)
+  anovamatrix <- cbind(anovamatrix, signif2)
   rownames(anovamatrix) <- comp
-  colnames(anovamatrix) <- c("Df","Sum sq","X2 value","Pr(>X2)","   ")
+  colnames(anovamatrix) <- c("Df", "Sum sq", "X2 value", "Pr(>X2)", "   ")
   print(anovamatrix)
-  cat("Residuals ", tail(Res.Df,n=1), tail(SSE,n=1), round(tail(SSE,n=1)/tail(Res.Df,n=1)))
+  cat("Residuals ", tail(Res.Df, n = 1), tail(SSE, n = 1), round(tail(SSE, n = 1) / tail(Res.Df, n = 1)))
 
   #return(model)
-
 }
 
