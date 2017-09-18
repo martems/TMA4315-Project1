@@ -23,45 +23,46 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   # and store the results in the list est
 
   #Coefficients, residuals, df, residual quantiles
-  coefficients <- solve(t(X)%*%X)%*%t(X)%*%y
-  Y_hat <- X%*%coefficients
-  residuals <- y-Y_hat
+  coefficients <- solve(t(X) %*% X) %*% t(X) %*% y
+  Y_hat <- X %*% coefficients
+  residuals <- y - Y_hat
   n <- nrow(Y_hat)
   p <- nrow(coefficients)
-  k <- p-1
-  df <- n-p
+  k <- p - 1
+  df <- n - p
   residual_quantiles <- quantile(residuals)
 
-  #SSE, SST, R squared, residual standard error, Pearsons linear corr coefficient
-  SSE <- t(residuals)%*%residuals
+  #SSE, SST, R squared, residual standard error, Pearsons linear corr
+  #coefficient
+  SSE <- t(residuals) %*% residuals
   I <- diag(n)
-  J <- matrix(1,nrow=n,ncol=n)
-  SST <- t(y)%*%(I-J/n)%*%y
-  R_squared <- 1-SSE/SST
-  residual_standard_error <- sqrt(SSE/(n-p))
-  linear_corr_coeff <- cor(X,method="pearson")
-  if (p <=2){
-    linear_corr_coeff <- linear_corr_coeff[1,1]
+  J <- matrix(1, nrow = n, ncol = n)
+  SST <- t(y) %*% (I - J / n) %*% y
+  R_squared <- 1 - SSE / SST
+  residual_standard_error <- sqrt(SSE / (n - p))
+  linear_corr_coeff <- cor(X, method = "pearson")
+  if (p <= 2){
+    linear_corr_coeff <- linear_corr_coeff[1, 1]
   } else {
-    linear_corr_coeff <- linear_corr_coeff[2:p,2:p]
+    linear_corr_coeff <- linear_corr_coeff[2:p, 2:p]
   }
 
   #sigma^2, covariance matrix, z-test test of significance
-  sigmasq <- SSE/(n-p)
-  sigmasq <- sigmasq[1,1]
-  covmatrix <- sigmasq*solve(t(X)%*%X)
+  sigmasq <- SSE / (n - p)
+  sigmasq <- sigmasq[1, 1]
+  covmatrix <- sigmasq * solve(t(X) %*% X)
   std_coefficients <- sqrt(diag(covmatrix))
-  z <- coefficients/std_coefficients
-  pvalue_z <- 2*pnorm(abs(z),lower.tail = FALSE)
+  z <- coefficients / std_coefficients
+  pvalue_z <- 2 * pnorm(abs(z), lower.tail = FALSE)
 
   #chisq test significance of the regression
-  chisq <- (SST-SSE)/(SSE/(n-p))
-  pvalue_chisq <- pchisq(chisq, df=k, lower.tail = FALSE)
+  chisq <- (SST - SSE) / (SSE / (n - p))
+  pvalue_chisq <- pchisq(chisq, df = k, lower.tail = FALSE)
 
   #ciritcal values of the tests
   alpha <- 0.05
-  critical_z <- c(qnorm(alpha/2),qnorm(1-alpha/2))
-  critical_chi <- c(qchisq(alpha/2,df=k), qchisq(1-alpha/2, df=k))
+  critical_z <- c(qnorm(alpha / 2), qnorm(1 - alpha / 2))
+  critical_chi <- c(qchisq(alpha / 2, df = k), qchisq(1 - alpha / 2, df = k))
 
   est <- list(terms = terms, model = mf)
 
@@ -97,7 +98,7 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   est$linear_corr_coeff <- linear_corr_coeff
 
   # Set class name. This is very important!
-  class(est) <- 'mylm'
+  class(est) <- "mylm"
 
   # Return the object with all results
   return(est)
