@@ -7,13 +7,13 @@ output: #3rd letter intentation hierarchy
 ###    incremental: true # or >* for one at a time
 #  slidy_presentation:
 #    font_adjustment: +1  
- # prettydoc::html_pretty:
-#    theme: architect
-#    highlight: github
-   pdf_document:
-    toc: true
-    toc_depth: 2
-    latex_engine: xelatex
+prettydoc::html_pretty:
+   theme: architect
+   highlight: github
+   # pdf_document:
+   #  toc: true
+   #  toc_depth: 2
+   #  latex_engine: xelatex
 ---
 
 ```{r setup, include=FALSE}
@@ -159,7 +159,7 @@ model1$SST
 
 The degrees of freedom for a linear model is $n - p$. For this particular model we therefore have `r model1$n` $-$ `r model1$p` $=$ `r model1$df` degrees of freedom.
 
-### Sifnificance of the regression 
+### Significance of the regression 
 
 We test the significance of the regression using a $\chi^2$-test with $k = p - 1$ degrees of freedom. We test if at least one of the regression parameters is different from 0. The expression for the $\chi^2$-statistics is 
 $$
@@ -171,15 +171,17 @@ model1$critical_z
 model1$critical_chi
 ```
 
-The $z$-test is a single hypothesis testing where we are interested in testing one null hypothesis against an alternative hypothesis. We test if a regression parameter $\beta_j$ is siginifcant: $H_0:\beta_j=0 \text{ vs. } H_1: \beta_j \neq 0$. We say that our test is done given that the other variables are present in the model are not zero. 
+The $z$-test is a single hypothesis test where we are interested in testing one null hypothesis against an alternative hypothesis. We test if a regression parameter $\beta_j$ is significant: $H_0: \beta_j = 0 \text{ vs. } H_1: \beta_j \neq 0$. Here we assume that all other regression parameters are _not_ equal to zero.
 
-In the $\chi^2$-test we are testing "significance of regression": $H_0: \beta_2=\beta_2=\cdots\beta_k=0 \text{ vs. }.H_1$: at least one different from zero.This means we test if at least one of the regression parameters (in addition to the intercept) is different from 0.
+In the $\chi^2$-test we are testing "significance of regression": $H_0: \beta_1 = \beta_2 = \cdots \beta_k = 0 \text{ vs. }.H_1 \text{: at least one different from zero}.
+
+This means we test if at least one of the regression coefficients is different from 0.
 
 ### ANOVA 
 
-In the anova function, the $\chi^2$-test is calculated as for when testing linear hypotheses, but with som changes. Instead of comparing the full regression model to a small model, we are now looking at the change in SSE between two smaller models. 
+In the ANOVA function, the $\chi^2$-test is calculated as when the testing linear hypotheses, but with some alterations. Instead of comparing the full regression model to a smaller model, we are now looking at the change in SSE between two smaller models. 
 
-Let $A$ be the full regression model and $B1$ and $B2$ be two smaller models, for example $B1$ with only intercept and $B2$ with intercept and education. Then the test statistics is:
+Let $A$ be the full regression model and $B1$ and $B2$ be two smaller models, for example $B1$ with only intercept and $B2$ with intercept _and_ education. Then the test statistics is:
 $$ \chi_\text{dfB1-dfB2}^2=\frac{\text{SSE}_{B1}-\text{SSE}_{B2}}{\frac{\text{SSE}_A}{\text{df}_A}}$$
 The complete output of the function `anova` with `model1`
 ```{r}
