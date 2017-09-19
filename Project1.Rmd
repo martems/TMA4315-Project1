@@ -299,7 +299,11 @@ In `model4a` and `model4b` we have added an interaction term to the model where 
 model4a$coefficients
 ```
 
-If the interaction effect is non-zero, the interpretation of the coefficients changes. Let us explain this table further, firstly be looking at `sexFemale`. In this case we expect a base rate of `r model4a$coefficients[1]` units of wage plus `r model4a$coefficients[3]` for each additional year of age. For the case of `sexMale` we have a reduction of the base rate equal to `r model4a$coefficients[2]`, but this is _more_ than compensated for by the additional increase in pay for each year of age, `r model4a$coefficients[4]`.
+If the interaction effect is non-zero, the interpretation of the coefficients changes. Let us explain this table further.
+
+* In the case of `sexFemale`, we expect a base rate of `r model4a$coefficients[1]` units of wage plus `r model4a$coefficients[3]` for each additional year of age. 
+
+* For the case of `sexMale` we have a reduction of the base rate equal to `r model4a$coefficients[2]`, but this is _more_ than compensated for by the additional increase in pay for each year of age, `r model4a$coefficients[4]`.
 
 
 ```{r}
@@ -326,7 +330,7 @@ is the conclusion? How can the test be performed without graphs? Does that give 
 # Part 5: Testing the `mylm` package
 
 ```{r}
-education2 = SLID$education^2 #square eudcation
+education2 = SLID$education^2 #square of education
 model5a <- mylm(wages ~ sex + age + language + education2 , data = SLID)
 model5b <- mylm(wages ~ language + age + language*age, data = SLID)
 model5c <- mylm(wages ~ education-1, data = SLID)
@@ -334,26 +338,35 @@ model5c <- mylm(wages ~ education-1, data = SLID)
 
 ```{r}
 summary(model5a)
-anova(model5a)
 ```
 
-From the summary we see that `sexMale`, `age` and `education2` are significant in the model. We see that all the singificant covariates have a positive impact on the response. $R^2=$ `r model5a$R_squared`, so the model only explain 30% of the variablility in the data. Language is not significiant so an idea would be to remove this from the model. 
+From the summary we see that `sexMale`, `age` and `education2` are significant in the model. Increase in `age` and `education` results in a higher expected level of `wage`. The same goes for being male instead of female. 
 
-MÅ KOMMENTERE NOE PÅ ANOVA 
+$R^2=$ `r model5a$R_squared`, so the model only explains 30% of the variability in the data. A possible improvement to the model would be to exclude `language` from the fitted variables. 
+
 
 ```{r}
 summary(model5b)
+```
+
+This model seems to have less explaining power than the previous one, as $R^2=$ `r model5b$R_squared`. The only covariate significant at a 0.001 level is `age`. The other semi-significant effect is the interaction between `languageFrench` and `age`. We can therefore say with some amount of certainty that french speaking people are expected to less degree of wage increase related to increased age.
+
+We are satisifed with fitting `language` as part of the model, especially when we compensate for the interaction effects. A possible improvement to the model is to add `education` as one of the fitted covariates. 
+
+```{r}
 anova(model5b)
 ```
-The significant terms are `intercept`, `age` and `languageFrench:age`. 
-MÅ SKRIVE MER HER
-mention one small change that could make the model better.
+
+The analysis of variance confirms that the interaction effect is the most cruical part of fitting `language` as a covariate. Still, the interaction effect has a relatively small explaining power relative to `age`.
+
 
 ```{r}
 summary(model5c)
-anova(model5c)
 ```
-MÅ GJØRES----
-Based on the results from each model, write a few sentences about the interpretation and significance of the
-parameters, and mention one small change that could make the model better.
+
+We can say with great certainty that `education` has a positive effect on `wage`. This is based on the value of the z-test, `r model5c$z_stat[1,1]`, resulting in p-value indistinguishable from 0.  
+
+There is no reason to believe that people without any education have zero wages. The result is that the coefficient for `education` becomes greater than it really is, in order to compensate for the missing intercept. A possible improvement is to include an intercept in the model. 
+
+
 

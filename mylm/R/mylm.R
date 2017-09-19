@@ -304,7 +304,9 @@ anova.mylm <- function(object, ...){
   rownames(anovamatrix) <- comp
   colnames(anovamatrix) <- c("Df", "Sum sq", "X2 value", "Pr(>X2)", "   ")
   print(anovamatrix)
-  cat("Residuals ", tail(Res.Df, n = 1), tail(SSE, n = 1), round(tail(SSE, n = 1) / tail(Res.Df, n = 1)))
+  cat("Residuals ", tail(Res.Df, n = 1), tail(SSE, n = 1))
+
+  cat("\nSignif. codes: 0 ´***´ 0.001 ´**´ 0.01 ´*´ 0.05 ´.´ 0.1 ´ ´ 1\n")
 
   #return(model)
 }
