@@ -100,7 +100,7 @@ $$
 $$
 where $\hat{\sigma}$ is the residual standard error. The residual sum of squares, SSE, is presented in Part 2 d). 
 
-From this, the estimated covariance matrix of the coefficients can be calculated by $\hat{\sigma}^2 ({\bf X}^T {\bf X})^{-1}$. The estimate of the covariance matrix for `model1` is
+From this, the estimated covariance matrix of the coefficients can be calculated by $\text{Cov}(\hat\beta)=\hat{\sigma}^2 ({\bf X}^T {\bf X})^{-1}$. The estimate of the covariance matrix for `model1` is
 ```{r}
 model1$covmatrix
 ```
@@ -227,7 +227,7 @@ model2 <- mylm(wages ~ education+age, data = SLID)
 summary(model2)
 ```
 
-The estimates and standard errors of the intercepts and regression coefficients for `model2` is presented in the summary above. From the $z$-test we can see that both `education` and `age` is significant in the model. The regression coefficients show that `education` has more effect on the response than `age`. 
+The estimates and standard errors of the intercepts and regression coefficients for `model2` is presented in the summary above. From the $z$-test we can see that all the regression paramteres is significant in the model.  
 
 ## c)
 
@@ -239,10 +239,8 @@ model2onlyage$coefficients
 model1$coefficients
 ```
 
-The parameter estimates differ because the model matrix $X$ changes as we add or remove terms. 
-MÅ SVARES PÅ
-When does the parameter estimates differ?
-Explain/show how you can use mylm to find these values.
+The parameters do differ when the elements of $\hat \beta$ are correlated. We know that $\text{Cov}(\hat \beta) = \hat\sigma^2(\bf X^T \bf X)^{-1}$. From this we can conclude that the parameter estimate differ when the columns of the design matrix $X$ are orthogonal. The parameter estimates in these models differ because the design matrix column for `age` is not orthogonal to the design matrix column for `education`.
+
 
 # Part 4: Analysis of variance (ANOVA)
 
@@ -251,18 +249,24 @@ Explain/show how you can use mylm to find these values.
 We fit a linear regression model to the data with `wages` as the response with `sex` and `language` as covariates. `model3a` is using dummy variable coding and `model3b` is using effect coding.
 ```{r}
 model3a <- mylm(wages ~ sex + language, data = SLID)
-model3b <- mylm(wages ~ sex + language, data = SLID, contrasts = list(language = "contr.sum",
-sex = "contr.sum"))
+summary(model3a)
 ```
 
+Here we have performed a dummy variable coding of the categorical covariates, where `female` has become the reference category for `sex` and `english` has become the reference category for `language`. This is due to the alphabetical ordering of the categories. 
+
+This means that being an english speaking woman is counted as being part of the average of the intercept, loosely speaking. As an example, a male is expected to have `r model3a$coefficients[2]` more units of wage compared to a female. 
+
 ```{r}
-summary(model3a)
+model3b <- mylm(wages ~ sex + language, data = SLID, contrasts = list(language = "contr.sum",
+sex = "contr.sum"))
 summary(model3b)
 ```
 
-Estimates and standard error of the intercept and effects of factors are found in the summarys. In both models, `intercept` and `sex` are significant from the $z$-test. The parameter estimates is different in the two models. In the `model3b` with effect coding we can see that the estimates of the coefficients are smaller than with dummy variable coding, while the intercept is bigger. 
+Here we have performed an effect coding of the categorical covariates. This mean that the sum of the effects for the levels of the factor sums to zero. You can find the "missing" coefficient of the reference category by negating the sum of the other coefficients (related to the same covariate). Compared to the dummy variable coding, there is no real case where only the intercept is used. 
 
-SKRIVE GJERNE NOE MER 
+In this coding scheme, `male` and `otherLanguage` are the "missing" categories. As an example, the missing coefficient for `otherLanguage` can be calculated by -(`r model3b$coefficients[3]` + `r model3b$coefficients[4]`) = `r -(model3b$coefficients[3] + model3b$coefficients[4])`.
+
+TODO: utdrag fra modelmatrix X
 
 ## b) 
 
@@ -271,8 +275,7 @@ anova(model3a)
 anova(model3b)
 ```
 
-Sequential anova of the two models `model3a` and `model3b` give the same result. `Sex` is significant when only covariate in the model. `Language` is not significant when added to the model with `intercept` and `sex`.
-SKRIV GJERNE NOE MER
+Sequential anova of the two models `model3a` and `model3b` give the same result. `Sex` is significant when it is the only covariate in the model. `Language` is not significant when added to the model with `intercept` and `sex`.
 
 ```{r, eval=FALSE}
 anova(mylm(wages ~ sex + language, data = SLID))
@@ -290,16 +293,31 @@ model4b <- mylm(wages ~ sex + age + sex*age, data = SLID, contrasts = list(langu
 sex = "contr.sum"))
 ```
 
-In `model4a` and `model4b` have added an interaction term to the model where the two predictor variablaes are multiplied. The presence of a significant interaction indicates that the effect of one predictor variable on the response variable is different at different values of the other predictor variable. 
+In `model4a` and `model4b` we have added an interaction term to the model where the two predictor variables are multiplied. The presence of a non-zero interaction indicates that the effect of one predictor variable on the response is different at different values of the other predictor variable.
 
 ```{r}
 model4a$coefficients
+```
+
+If the interaction effect is non-zero, the interpretation of the coefficients changes. Let us explain this table further, firstly be looking at `sexFemale`. In this case we expect a base rate of `r model4a$coefficients[1]` units of wage plus `r model4a$coefficients[3]` for each additional year of age. For the case of `sexMale` we have a reduction of the base rate equal to `r model4a$coefficients[2]`, but this is _more_ than compensated for by the additional increase in pay for each year of age, `r model4a$coefficients[4]`.
+
+
+```{r}
 model4b$coefficients
 ```
 
-Adding an interaction term to the model changes the interpretation of all of the coefficients. If there were no interaction term, the coefficient for `age` would be interpreted as the unique effect of `age` one the respons. But the interaction means that the effect of `age` is different for different values of `sex`.  So the unique effect of `sage` on `wages` also depends on the values of the interaction coefficient and `sex`. The unique effect of `age` is represented by everything that is multiplied by `age` in the model. The coefficient for `age` alone is now interpreted as the unique effect of `age` on only when `sex`= 0.
+The interpretation for this table goes along the same lines as for the interpretation for the coefficient table from task 4b) related to effect coding.
 
-MÅ GJØRES-------
+* A male is expected to have a base rate of wage equal to `r model4b$coefficients[1]` + (-1) $*$ `r model4b$coefficients[2]` plus a wage increase for each additional year of age equal to `r model4b$coefficients[3]` + (-1) $*$ `r model4b$coefficients[4]`. 
+
+* A female is expected to have a base rate of wage equal to `r model4b$coefficients[1]` + 1 $*$ `r model4b$coefficients[2]` plus a wage increase for each additional year of age equal to `r model4b$coefficients[3]` + 1 $*$ `r model4b$coefficients[4]`. 
+
+In other words, men are expected to have a greater benefit of getting older when it comes to wage, compared to women. 
+
+
+
+
+TODO:
 
 Test whether regression coefficients have a common slope or not. Plot the regression lines for the different
 values of sex in the same plot, and perform the test using the plot (use ggplot). Describe the graph. What

@@ -279,10 +279,7 @@ anova.mylm <- function(object, ...){
   }
   for(numComp2 in 1:length(comp)){
     X2_value[numComp2] <- SSEdiff[numComp2] / (SSE[length(comp)] / Res.Df[length(comp)])
-    pvalue_chisqX2[numComp2] <- pchisq(
-      X2_value[numComp2],
-      df = Df[numComp2],
-      lower.tail = FALSE
+    pvalue_chisqX2[numComp2] <- pchisq(X2_value[numComp2],df = Df[numComp2],lower.tail = FALSE
     )
   }
   signif2 <- vector(mode = "character", length = length(comp))
@@ -301,12 +298,7 @@ anova.mylm <- function(object, ...){
       warning("Calulated P-value >= 1")
     }
   }
-  anovamatrix <- cbind(
-    Df,
-    round(SSEdiff),
-    round(X2_value, 2),
-    pvalue_chisqX2
-  )
+  anovamatrix <- cbind(Df,round(SSEdiff), round(X2_value, 2),pvalue_chisqX2)
   anovamatrix <- data.frame(anovamatrix)
   anovamatrix <- cbind(anovamatrix, signif2)
   rownames(anovamatrix) <- comp
