@@ -177,7 +177,7 @@ model1$critical_chi
 
 The $z$-test is a single hypothesis test where we are interested in testing one null hypothesis against an alternative hypothesis. We test if a regression parameter $\beta_j$ is significant: $H_0: \beta_j = 0 \text{ vs. } H_1: \beta_j \neq 0$. Here we assume that all other regression parameters are _not_ equal to zero.
 
-In the $\chi^2$-test we are testing "significance of regression": $H_0: \beta_1 = \beta_2 = \cdots \beta_k = 0 \text{ vs. }.H_1 \text{: at least one different from zero}.
+In the $\chi^2$-test we are testing "significance of regression": $H_0: \beta_1 = \beta_2 = \cdots \beta_k = 0 \text{ vs. }.H_1 \text{: at least one different from zero}$.
 
 This means we test if at least one of the regression coefficients is different from 0.
 
