@@ -1,8 +1,8 @@
 ---
 title: "Project 1"
-author: "Martinussen & Saghagen"
+author: "Jakob Martinussen and Marte Saghagen"
 date: "September 6, 2017"
-output: #3rd letter intentation hierarchy
+output: #3rd letter indentation hierarchy
 #  beamer_presentation:
 ###    incremental: true # or >* for one at a time
 #  slidy_presentation:
@@ -134,11 +134,12 @@ This function draws a scatter plot with _fitted_ values on the $x$-axis, and res
 
 ### Fitted values and residuals
 
-The fitted values and residuals are calculated by the following formulas
-$$\hat{\bf Y} = {\bf X}  \hat{\beta} $$
-$$\hat{\varepsilon}={\bf Y} - \hat{\bf Y}$$
+The fitted values and residuals are calculated by the following formulas,
 
-and can be drawn in a scatter plot as explained above in the following way
+$$\hat{\bf Y} = {\bf X}  \hat{\beta} $$
+$$\hat{\varepsilon}={\bf Y} - \hat{\bf Y},$$
+
+and can be drawn in a scatter plot, as explained, above in the following way
 ```{r, results='hide'}
 plot(model1)
 ```
@@ -202,7 +203,7 @@ The numerical values for `model1` is
 model1$linear_corr_coeff
 ```
 
-In `model1`, there is a sligth negative correlation. Hence, an increase in `education` is associated with a decrease in `age`.
+In `model1`, there is a small, negative correlation. Hence, an increase in `education` is associated with a decrease in `age`.
 
 ### Output of `summary`
 
@@ -227,7 +228,7 @@ model2 <- mylm(wages ~ education+age, data = SLID)
 summary(model2)
 ```
 
-The estimates and standard errors of the intercepts and regression coefficients for `model2` is presented in the summary above. From the $z$-test we can see that all the regression paramteres is significant in the model.  
+The estimates and standard errors of the intercepts and regression coefficients for `model2` is presented in the summary above. From the $z$-test we can see that all the regression parameters is significant in the model.
 
 ## c)
 
@@ -254,7 +255,7 @@ summary(model3a)
 
 Here we have performed a dummy variable coding of the categorical covariates, where `female` has become the reference category for `sex` and `english` has become the reference category for `language`. This is due to the alphabetical ordering of the categories. 
 
-This means that being an english speaking woman is counted as being part of the average of the intercept, loosely speaking. As an example, a male is expected to have `r model3a$coefficients[2]` more units of wage compared to a female. 
+This means that being an english-speaking woman is counted as being part of the average of the intercept, loosely speaking. As an example, a male is expected to have `r model3a$coefficients[2]` more units of wage compared to a female. 
 
 ```{r}
 model3b <- mylm(wages ~ sex + language, data = SLID, contrasts = list(language = "contr.sum",
@@ -267,7 +268,7 @@ Here we have performed an effect coding of the categorical covariates. This mean
 In this coding scheme, `male` and `otherLanguage` are the "missing" categories. As an example, the missing coefficient for `otherLanguage` can be calculated by -(`r model3b$coefficients[3]` + `r model3b$coefficients[4]`) = `r -(model3b$coefficients[3] + model3b$coefficients[4])`.
 
 We can see how the design matrix changes between the two different coding schemes by selecting a 3 rows which represent all three languages. First the dummy variable coding:
-  
+
 ```{r}
 samples <- c(1, 164, 178)
 model3a$X[samples, ]
@@ -289,7 +290,7 @@ anova(model3b)
 ```
 
 
-Sequential anova of the two models `model3a` and `model3b` give the same result. `Sex` is significant when it is the only covariate in the model. `Language` is not significant when added to the model with `intercept` and `sex`.
+Sequential ANOVA of the two models `model3a` and `model3b` give the same result. `Sex` is significant when it is the only covariate in the model. `Language` is not significant when added to the model with `intercept` and `sex`.
 
 ```{r, eval=FALSE}
 anova(mylm(wages ~ sex + language, data = SLID))
@@ -297,7 +298,7 @@ and
 anova(mylm(wages ~ language + sex, data = SLID))
 ```
 
-The commands above give different results because the terms are added sequantially. The commands produce a sequential table of the reductions in residual sum of squares (SSE) as each term in the regression formula is added in turn. Therefore the reductions in SSE will differ as the terms are added in different orders.  
+The commands above give different results because the terms are added sequentially. The commands produce a sequential table of the reductions in residual sum of squares (SSE) as each term in the regression formula is added in turn. Therefore the reductions in SSE will differ as the terms are added in different orders.
 
 ## c)
 
@@ -373,22 +374,19 @@ summary(model5b)
 
 This model seems to have less explaining power than the previous one, as $R^2=$ `r model5b$R_squared`. The only covariate significant at a 0.001 level is `age`. The other semi-significant effect is the interaction between `languageFrench` and `age`. We can therefore say with some amount of certainty that french speaking people are expected to less degree of wage increase related to increased age.
 
-We are satisifed with fitting `language` as part of the model, especially when we compensate for the interaction effects. A possible improvement to the model is to add `education` as one of the fitted covariates. 
+We are satisfied with fitting `language` as part of the model, especially when we compensate for the interaction effects. A possible improvement to the model is to add `education` as one of the fitted covariates. 
 
 ```{r}
 anova(model5b)
 ```
 
-The analysis of variance confirms that the interaction effect is the most cruical part of fitting `language` as a covariate. Still, the interaction effect has a relatively small explaining power relative to `age`.
+The analysis of variance confirms that the interaction effect is the most crucial part of fitting `language` as a covariate. Still, the interaction effect has a relatively small explaining power relative to `age`.
 
 
 ```{r}
 summary(model5c)
 ```
 
-We can say with great certainty that `education` has a positive effect on `wage`. This is based on the value of the z-test, `r model5c$z_stat[1,1]`, resulting in p-value indistinguishable from 0.  
+We can say with great certainty that `education` has a positive effect on `wage`. This is based on the value of the z-test, `r model5c$z_stat[1,1]`, resulting in p-value indistinguishable from 0.
 
 There is no reason to believe that people without any education have zero wages. The result is that the coefficient for `education` becomes greater than it really is, in order to compensate for the missing intercept. A possible improvement is to include an intercept in the model. 
-
-
-
