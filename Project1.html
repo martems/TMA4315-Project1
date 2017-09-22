@@ -372,7 +372,20 @@ model2onlyage$coefficients</code></pre></div>
 ## Chisquared-statistics:  196.0237 on 3 and 3983 DF,    p-value:  3.049905e-42</code></pre>
 <p>Here we have performed an effect coding of the categorical covariates. This mean that the sum of the effects for the levels of the factor sums to zero. You can find the “missing” coefficient of the reference category by negating the sum of the other coefficients (related to the same covariate). Compared to the dummy variable coding, there is no real case where only the intercept is used.</p>
 <p>In this coding scheme, <code>male</code> and <code>otherLanguage</code> are the “missing” categories. As an example, the missing coefficient for <code>otherLanguage</code> can be calculated by -(-0.0897211 + -0.2385605) = 0.3282816.</p>
-<p>TODO: utdrag fra modelmatrix X</p>
+<p>We can see how the design matrix changes between the two different coding schemes by selecting a 3 rows which represent all three languages. First the dummy variable coding:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">samples &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">164</span>, <span class="dv">178</span>)
+model3a$X[samples, ]</code></pre></div>
+<pre><code>##     (Intercept) sexMale languageFrench languageOther
+## 1             1       1              0             0
+## 322           1       0              1             0
+## 348           1       0              0             1</code></pre>
+<p>And then the effect coding:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model3b$X[samples, ]</code></pre></div>
+<pre><code>##     (Intercept) sex1 language1 language2
+## 1             1   -1         1         0
+## 322           1    1         0         1
+## 348           1    1        -1        -1</code></pre>
+<p>Here we clearly see that the levels sum to zero.</p>
 </div>
 <div id="b-2" class="section level2">
 <h2>b)</h2>
@@ -450,7 +463,7 @@ model4b &lt;-<span class="st"> </span><span class="kw">mylm</span>(wages ~<span 
 ## Residual standard error:  7.109952 on 3983 degrees of freedom
 ## Multiple R-squared:  0.1841407 
 ## Chisquared-statistics:  898.9691 on 3 and 3983 DF,    p-value:  1.481239e-194</code></pre>
-<p>We see a non-zero interaction effect between <code>sexMale</code> and <code>age</code>, with a significance level of less than <span class="math inline">\(0.01\)</span>. The visual plot and the numeric analysis gives therefore the same conclusion.</p>
+<p>We see a non-zero interaction effect between <code>sexMale</code> and <code>age</code>, with a significance level stronger than <span class="math inline">\(0.01\)</span>. The visual plot and the numeric analysis gives therefore the same conclusion.</p>
 </div>
 </div>
 <div id="part-5-testing-the-mylm-package" class="section level1">

@@ -260,13 +260,26 @@ This means that being an english speaking woman is counted as being part of the 
 model3b <- mylm(wages ~ sex + language, data = SLID, contrasts = list(language = "contr.sum",
 sex = "contr.sum"))
 summary(model3b)
-  ```
+```
 
 Here we have performed an effect coding of the categorical covariates. This mean that the sum of the effects for the levels of the factor sums to zero. You can find the "missing" coefficient of the reference category by negating the sum of the other coefficients (related to the same covariate). Compared to the dummy variable coding, there is no real case where only the intercept is used. 
 
 In this coding scheme, `male` and `otherLanguage` are the "missing" categories. As an example, the missing coefficient for `otherLanguage` can be calculated by -(`r model3b$coefficients[3]` + `r model3b$coefficients[4]`) = `r -(model3b$coefficients[3] + model3b$coefficients[4])`.
 
-TODO: utdrag fra modelmatrix X
+We can see how the design matrix changes between the two different coding schemes by selecting a 3 rows which represent all three languages. First the dummy variable coding:
+  
+```{r}
+samples <- c(1, 164, 178)
+model3a$X[samples, ]
+```
+
+And then the effect coding:
+
+```{r}
+model3b$X[samples, ]
+```
+
+Here we clearly see that the levels sum to zero.
 
 ## b) 
 
@@ -274,6 +287,7 @@ TODO: utdrag fra modelmatrix X
 anova(model3a)
 anova(model3b)
 ```
+
 
 Sequential anova of the two models `model3a` and `model3b` give the same result. `Sex` is significant when it is the only covariate in the model. `Language` is not significant when added to the model with `intercept` and `sex`.
 
