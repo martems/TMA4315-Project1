@@ -260,7 +260,7 @@ This means that being an english speaking woman is counted as being part of the 
 model3b <- mylm(wages ~ sex + language, data = SLID, contrasts = list(language = "contr.sum",
 sex = "contr.sum"))
 summary(model3b)
-```
+  ```
 
 Here we have performed an effect coding of the categorical covariates. This mean that the sum of the effects for the levels of the factor sums to zero. You can find the "missing" coefficient of the reference category by negating the sum of the other coefficients (related to the same covariate). Compared to the dummy variable coding, there is no real case where only the intercept is used. 
 
@@ -318,14 +318,22 @@ The interpretation for this table goes along the same lines as for the interpret
 
 In other words, men are expected to have a greater benefit of getting older when it comes to wage, compared to women. 
 
+Now we test whether the regression coefficients have a common slope or not, using a plot.
 
+```{r}
+ggplot(data = SLID) + 
+  aes(x = age, y = wages, col = sex) +
+  geom_smooth(method="lm", se=TRUE) +
+  geom_point(alpha=0.5)
+```
 
+The regression lines are definitely different for the two sexes, and we can observe that men have a greater increase in wage as they get older, compared to women. The same test, without using a plot, can be performed by observing the summary of of model4b, especially the interaction effect between age and sex.
 
-TODO:
+```{r}
+summary(model4a)
+```
 
-Test whether regression coefficients have a common slope or not. Plot the regression lines for the different
-values of sex in the same plot, and perform the test using the plot (use ggplot). Describe the graph. What
-is the conclusion? How can the test be performed without graphs? Does that give the same conclusion?
+We see a non-zero interaction effect between `sexMale` and `age`, with a significance level stronger than $0.01$. The visual plot and the numeric analysis gives therefore the same conclusion.
 
 # Part 5: Testing the `mylm` package
 
