@@ -107,21 +107,43 @@ g &lt;-<span class="st"> </span><span class="kw">ggpairs</span>(SLID)</code></pr
 </div>
 <div id="part-2-linear-regression-with-mylm-package" class="section level1">
 <h1>Part 2: Linear regression with mylm package</h1>
-<p>In this project we have created our own R-package, named <code>mylm</code>, to handle linear models for Gaussian data. We will use this package in order to analyze an example dataset. The example dataset consists of <span class="math inline">\(n = 3987\)</span> observations of the following 5 variables:</p>
-<ul>
-<li><code>wages</code>: composite hourly wage rate from all jobs.</li>
-<li><code>education</code>: number of years in schooling.</li>
-<li><code>age</code>: in years.</li>
-<li><code>sex</code>: Male or Female.</li>
-<li><code>language</code>: English, French or Other.</li>
-</ul>
+<p>In this project we have created our own R-package, named <code>mylm</code>, to handle linear models for Gaussian data. We will use this package in order to analyze an example dataset, which consists of <span class="math inline">\(n = 3987\)</span> observations of the following 5 variables:</p>
+<table>
+<tbody>
+<tr class="odd">
+<td align="left"><code>wages</code> - Composite hourly wage rate from all jobs.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>education</code> - Number of years in schooling.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>age</code> - Of individual in years.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>sex</code> - ‘Male’ or ‘Female’.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>language</code> - ‘English’, ‘French’ or ‘Other’.</td>
+</tr>
+</tbody>
+</table>
 <p>We want to study how the qualitative variable <code>wages</code> depends on one or more explanatory variables. The <code>mylm</code> package consists of the following functions:</p>
-<ul>
-<li><code>print.mylm</code>: invokes the <code>mylm</code> function and prints the result, including the estimated regression coefficients.</li>
-<li><code>plot.mylm</code>: draws a scatter plot with fitted values and residuals.</li>
-<li><code>summary.mylm</code>: returns a list of summary statistics of the fitted linear model, e.g. coefficients, standard errors, tests of significance, and so on.</li>
-<li><code>anova.mylm</code>: gives the results of a sequential ANOVA.</li>
-</ul>
+<table>
+<tbody>
+<tr class="odd">
+<td align="left"><code>print.mylm</code> - Invokes the <code>mylm</code> function and prints the result, including the estimated regression coefficients.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>plot.mylm</code> - Draws a scatter plot with fitted values and residuals.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>summary.mylm</code> - Returns a list of summary statistics of the fitted linear model, e.g. coefficients, standard errors, tests of significance, and so on.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>anova.mylm</code> - Gives the results of a sequential ANOVA.</td>
+</tr>
+</tbody>
+</table>
 <div id="notation" class="section level3">
 <h3>Notation:</h3>
 <ul>
